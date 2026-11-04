@@ -65,6 +65,9 @@ function weaponLabel(value: WeaponType) {
       <el-select v-model="rarity" placeholder="稀有度" clearable class="filter-select">
         <el-option label="5 星" :value="5" />
         <el-option label="4 星" :value="4" />
+        <el-option label="3 星" :value="3" />
+        <el-option label="2 星" :value="2" />
+        <el-option label="1 星" :value="1" />
       </el-select>
       <el-button v-if="hasFilter" text @click="resetFilters">重置</el-button>
       <span class="muted result-count">共 {{ filtered.length }} 把武器</span>
@@ -72,6 +75,18 @@ function weaponLabel(value: WeaponType) {
 
     <div v-if="filtered.length" class="panel table-panel">
       <el-table :data="filtered" stripe style="width: 100%">
+        <el-table-column label="" width="58" align="center">
+          <template #default="{ row }">
+            <img
+              v-if="row.icon"
+              class="weapon-icon"
+              :src="row.icon"
+              :alt="row.name"
+              loading="lazy"
+            />
+            <span v-else class="weapon-icon weapon-icon--empty">武</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="name" label="名称" min-width="160" />
         <el-table-column label="类型" width="110">
           <template #default="{ row }">{{ weaponLabel(row.type) }}</template>
@@ -132,6 +147,23 @@ function weaponLabel(value: WeaponType) {
   color: var(--brand);
   font-size: 12px;
   white-space: nowrap;
+}
+
+.weapon-icon {
+  display: block;
+  width: 36px;
+  height: 36px;
+  margin: 0 auto;
+  border-radius: 9px;
+  object-fit: contain;
+  background: var(--surface-2);
+}
+
+.weapon-icon--empty {
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  font-size: 12px;
 }
 
 @media (max-width: 600px) {

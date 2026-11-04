@@ -24,7 +24,16 @@ const store = useDatasetStore()
         class="echo-card panel panel--padded"
       >
         <header class="echo-card__head">
-          <h2>{{ echo.name }}</h2>
+          <div class="echo-card__title">
+            <img
+              v-if="echo.icon"
+              class="echo-icon"
+              :src="echo.icon"
+              :alt="echo.name"
+              loading="lazy"
+            />
+            <h2>{{ echo.name }}</h2>
+          </div>
           <ElementTag v-if="echo.element" :element="echo.element" />
         </header>
         <div class="echo-card__effects">
@@ -67,6 +76,20 @@ const store = useDatasetStore()
   gap: 8px;
   align-items: center;
   justify-content: space-between;
+}
+
+.echo-card__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.echo-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: var(--surface-2);
 }
 
 .echo-card__head h2 {

@@ -1,29 +1,14 @@
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
-const cacheDir = join(root, '.cache', 'wuwa')
+const cacheDir = join(root, '.cache', 'wuwa', 'encore')
 const outDir = join(root, 'public', 'data')
 const refresh = process.argv.includes('--refresh')
+const API = 'https://api.encore.moe/zh-Hans'
 
-const SOURCES = {
-  roleInfo:
-    'https://raw.githubusercontent.com/Arikatsu/WutheringWaves_Data/HEAD/BinData/role/roleinfo.json',
-  weaponConf:
-    'https://raw.githubusercontent.com/Arikatsu/WutheringWaves_Data/HEAD/BinData/weapon/weaponconf.json',
-  text: 'https://raw.githubusercontent.com/Dimbreath/WutheringData/master/TextMap/zh-Hans/MultiText.json',
-  propertyIndex:
-    'https://raw.githubusercontent.com/Dimbreath/WutheringData/master/ConfigDB/PropertyIndex.json',
-  baseProperty:
-    'https://raw.githubusercontent.com/Dimbreath/WutheringData/master/ConfigDB/BaseProperty.json',
-  fetterGroup:
-    'https://raw.githubusercontent.com/Dimbreath/WutheringData/master/ConfigDB/PhantomFetterGroup.json',
-  fetter:
-    'https://raw.githubusercontent.com/Dimbreath/WutheringData/master/ConfigDB/PhantomFetter.json',
-}
-
-const ELEMENTS = {
+const ELEMENT_BY_ID = {
   1: 'glacio',
   2: 'fusion',
   3: 'electro',
@@ -32,7 +17,16 @@ const ELEMENTS = {
   6: 'havoc',
 }
 
-const WEAPONS = {
+const ELEMENT_BY_NAME = {
+  冷凝: 'glacio',
+  热熔: 'fusion',
+  导电: 'electro',
+  气动: 'aero',
+  衍射: 'spectro',
+  湮灭: 'havoc',
+}
+
+const WEAPON_BY_ID = {
   1: 'broadblade',
   2: 'sword',
   3: 'pistols',
@@ -40,7 +34,15 @@ const WEAPONS = {
   5: 'rectifier',
 }
 
-const ELEMENT_PATHS = {
+const WEAPON_BY_NAME = {
+  长刃: 'broadblade',
+  迅刀: 'sword',
+  佩枪: 'pistols',
+  臂铠: 'gauntlets',
+  音感仪: 'rectifier',
+}
+
+const ELEMENT_ICON_KEYS = {
   ice: 'glacio',
   fire: 'fusion',
   thunder: 'electro',
@@ -49,63 +51,179 @@ const ELEMENT_PATHS = {
   dark: 'havoc',
 }
 
-const asArray = (value) => (Array.isArray(value) ? value : Object.values(value))
+const asArray = (value) => (Array.isArray(value) ? value : [])
 
-const cleanText = (value) => {
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const clean = (value) => {
   if (typeof value !== 'string') return ''
   return value
-    .replace(/<[^>]+>/g, '')
-    .replace(/\\n/g, '\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/?[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
     .replace(/\r/g, '')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
     .trim()
 }
 
-const applyParams = (template, params = []) =>
-  cleanText(template).replace(/\{(\d+)\}/g, (_, index) => {
-    const param = params[Number(index)]
-    const value =
-      typeof param === 'string' ? param : param?.ArrayString?.[0]
-    return value ?? `{${index}}`
-  })
+const textOf = (value) =>
+  clean(typeof value === 'string' ? value : value?.Content)
 
-const cacheFile = (name) => join(cacheDir, `${name}.json`)
+const imageUrl = (value) => {
+  if (!value) return undefined
+  return value
+    .replace(
+      'https://api-v2.encore.moe/api/resource/',
+      'https://api.encore.moe/resource/',
+    )
+    .replace(
+      'https://api-v2.encore.moe/resource/',
+      'https://api.encore.moe/resource/',
+    )
+}
 
-async function hasCache(name) {
+const elementOf = (element) =>
+  ELEMENT_BY_ID[element?.Id] || ELEMENT_BY_NAME[element?.Name]
+
+const weaponOf = (weapon) =>
+  WEAPON_BY_ID[weapon?.Id] || WEAPON_BY_NAME[weapon?.Name]
+
+async function fileExists(path) {
   try {
-    const info = await stat(cacheFile(name))
+    const info = await stat(path)
     return info.size > 0
   } catch {
     return false
   }
 }
 
-async function ensureSource(name) {
-  if (!refresh && (await hasCache(name))) {
-    console.log(`[cache] ${name}`)
-    return
+async function fetchJson(url, attempts = 3) {
+  let lastError
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        headers: { accept: 'application/json' },
+        signal: AbortSignal.timeout(90_000),
+      })
+
+      if (!response.ok) {
+        throw new Error(`${url} -> HTTP ${response.status}`)
+      }
+
+      return await response.json()
+    } catch (error) {
+      lastError = error
+      if (attempt < attempts) await sleep(attempt * 1000)
+    }
   }
 
-  const url = SOURCES[name]
-  console.log(`[fetch] ${url}`)
-  const response = await fetch(url, {
-    signal: AbortSignal.timeout(300_000),
-  })
-
-  if (!response.ok) {
-    throw new Error(`${name} 下载失败：HTTP ${response.status}`)
-  }
-
-  const text = await response.text()
-  JSON.parse(text)
-  await writeFile(cacheFile(name), text, 'utf8')
-  console.log(`[save ] ${name} (${(text.length / 1024 / 1024).toFixed(1)} MB)`)
+  throw lastError
 }
 
-function elementFromPath(path) {
-  if (!path) return undefined
-  const lower = path.toLowerCase()
-  for (const [key, element] of Object.entries(ELEMENT_PATHS)) {
+async function cachedJson(relativePath, url) {
+  const path = join(cacheDir, relativePath)
+
+  if (!refresh && (await fileExists(path))) {
+    return JSON.parse(await readFile(path, 'utf8'))
+  }
+
+  const data = await fetchJson(url)
+  await mkdir(dirname(path), { recursive: true })
+  await writeFile(path, JSON.stringify(data), 'utf8')
+  return data
+}
+
+async function mapLimit(items, limit, mapper, label) {
+  const results = new Array(items.length)
+  let cursor = 0
+  let completed = 0
+
+  async function worker() {
+    while (true) {
+      const index = cursor
+      cursor += 1
+      if (index >= items.length) return
+
+      results[index] = await mapper(items[index], index)
+      completed += 1
+
+      if (completed % 10 === 0 || completed === items.length) {
+        console.log(`[detail] ${label} ${completed}/${items.length}`)
+      }
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, () => worker()),
+  )
+
+  return results
+}
+
+function buildStats(properties = []) {
+  const get = (name) =>
+    properties.find((property) => property.Name === name)?.BaseValue
+
+  const hp = get('生命')
+  const atk = get('攻击')
+  const def = get('防御')
+  const crit = get('暴击')
+  const critDamage = get('暴击伤害')
+
+  if (![hp, atk, def].some((value) => typeof value === 'number')) {
+    return undefined
+  }
+
+  return {
+    level: 1,
+    hp,
+    atk,
+    def,
+    critRate: typeof crit === 'number' ? crit / 100 : undefined,
+    critDamage: typeof critDamage === 'number' ? critDamage / 100 : undefined,
+    energyRegen: 100,
+  }
+}
+
+const STAT_LABELS = {
+  暴击: '暴击率',
+  攻击: '攻击力',
+  生命: '生命值',
+  防御: '防御力',
+}
+
+function formatWeaponStat(property) {
+  if (!property) return ''
+
+  const finalValue = property.GrowthValues?.at(-1)?.Value
+  const isPercent =
+    typeof finalValue === 'string' && finalValue.includes('%')
+  const value = isPercent ? property.BaseValue / 100 : property.BaseValue
+  const label = STAT_LABELS[property.Name] || property.Name
+
+  return `${label} ${isPercent ? `${value.toFixed(1)}%` : value}`
+}
+
+function elementFromIcon(icon) {
+  if (!icon) return undefined
+  const lower = icon.toLowerCase()
+  for (const [key, element] of Object.entries(ELEMENT_ICON_KEYS)) {
     if (lower.includes(key)) return element
+  }
+  return undefined
+}
+
+function elementFromText(text) {
+  if (!text) return undefined
+  for (const [key, element] of Object.entries(ELEMENT_BY_NAME)) {
+    if (text.includes(key)) return element
   }
   return undefined
 }
@@ -114,187 +232,227 @@ async function main() {
   await mkdir(cacheDir, { recursive: true })
   await mkdir(outDir, { recursive: true })
 
-  for (const name of Object.keys(SOURCES)) {
-    await ensureSource(name)
-  }
+  console.log('[fetch] 角色 / 武器 / 声骸列表')
+  const [characterList, weaponList, echoList] = await Promise.all([
+    cachedJson('characters.json', `${API}/character`),
+    cachedJson('weapons.json', `${API}/weapon`),
+    cachedJson('echoes.json', `${API}/echo`),
+  ])
 
-  const [roleInfo, weaponConf, text, propertyIndex, baseProperty, fetterGroup, fetter] =
-    await Promise.all(
-      Object.keys(SOURCES).map(async (name) =>
-        JSON.parse(await readFile(cacheFile(name), 'utf8')),
-      ),
-    )
+  const roleList = asArray(characterList.roleList)
+  const weaponRows = asArray(weaponList.weapons)
+  const echoRows = asArray(echoList.Echo)
 
-  const texts = text
-  const propertyById = new Map(asArray(propertyIndex).map((item) => [item.Id, item]))
-  const baseById = new Map(asArray(baseProperty).map((item) => [item.Id, item]))
-  const fetterById = new Map(asArray(fetter).map((item) => [item.Id, item]))
+  console.log(
+    `[list ] 角色 ${roleList.length} / 武器 ${weaponRows.length} / 声骸 ${echoRows.length}`,
+  )
 
-  const PROPERTY_LABELS = {
-    Crit: '暴击率',
-    CritDamage: '暴击伤害',
-    EnergyEfficiency: '共鸣效率',
-    Atk: '攻击力',
-    GreenAtk: '攻击力',
-    LifeMax: '生命值',
-    Def_: '防御力',
-  }
+  const seenCharacterNames = new Set()
+  const baseCharacters = roleList.filter((item) => {
+    const name = clean(item.Name)
+    if (!name || seenCharacterNames.has(name)) return false
+    seenCharacterNames.add(name)
+    return true
+  })
 
-  const propertyName = (id) => {
-    const property = propertyById.get(id)
-    if (!property) return ''
-    return (
-      PROPERTY_LABELS[property.Key] ||
-      cleanText(texts[property.Name] || property.Key || '')
-    )
-  }
+  let characterDetailFailures = 0
 
-  const formatPropertyValue = (property, value, isRatio) => {
-    if (isRatio) return `${(value * 100).toFixed(1)}%`
-    if (property?.IsPercent) return `${(value / 100).toFixed(1)}%`
-    return String(value)
-  }
+  const characters = await mapLimit(
+    baseCharacters,
+    4,
+    async (item) => {
+      let detail = null
 
-  const seenNames = new Set()
-  const characters = asArray(roleInfo)
-    .filter(
-      (item) =>
-        (item.QualityId === 4 || item.QualityId === 5) &&
-        item.RoleType === 1 &&
-        !item.IsTrial &&
-        !item.ParentId,
-    )
-    .map((item) => {
-      const name = cleanText(texts[item.Name] || '')
-      const element = ELEMENTS[item.ElementId]
-      const weapon = WEAPONS[item.WeaponType]
-      const description = cleanText(texts[item.Introduction] || '')
-      const base = baseById.get(item.PropertyId)
+      try {
+        detail = await cachedJson(
+          `characters/${item.Id}.json`,
+          `${API}/character/${item.Id}`,
+        )
+      } catch (error) {
+        characterDetailFailures += 1
+        console.warn(`[warn ] 角色 ${item.Id} 详情失败：${error.message}`)
+      }
 
-      const stats = base
-        ? {
-            level: base.Lv ?? 1,
-            hp: base.LifeMax,
-            atk: base.Atk,
-            def: base.Def_,
-            critRate: base.Crit / 100,
-            critDamage: base.CritDamage / 100,
-            energyRegen: base.EnergyEfficiency / 100,
-          }
-        : undefined
+      const skills = asArray(detail?.Skills)
+        .map((skill) => ({
+          name: clean(skill.SkillName),
+          type: clean(skill.SkillType),
+          description: clean(skill.SkillDescribe),
+        }))
+        .filter((skill) => skill.name && skill.description)
 
       return {
         id: String(item.Id),
-        name,
+        name: clean(item.Name),
         rarity: item.QualityId,
-        element,
-        weapon,
-        description:
-          description && description !== '敬请期待' ? description : undefined,
-        stats,
+        element: elementOf(item.Element),
+        weapon: weaponOf(item.WeaponType),
+        roles: asArray(detail?.Tags)
+          .map((tag) => clean(tag.TagName))
+          .filter(Boolean),
+        description: textOf(detail?.Introduction) || undefined,
+        avatar: imageUrl(item.RoleHeadIcon),
+        stats: buildStats(asArray(detail?.Properties)),
+        skills: skills.length ? skills : undefined,
       }
-    })
-    .filter(
-      (item) =>
-        item.name &&
-        item.element &&
-        item.weapon &&
-        !/^(test|测试)/i.test(item.name) &&
-        !/处决用|声骸角色/.test(item.name),
-    )
-    .filter((item) => {
-      if (seenNames.has(item.name)) return false
-      seenNames.add(item.name)
-      return true
-    })
-    .sort(
-      (a, b) =>
-        b.rarity - a.rarity || a.name.localeCompare(b.name, 'zh-Hans'),
-    )
+    },
+    '角色',
+  )
 
   const seenWeaponNames = new Set()
-  const weapons = asArray(weaponConf)
-    .filter((item) => item.QualityId === 4 || item.QualityId === 5)
-    .map((item) => {
-      const name = cleanText(texts[item.WeaponName] || '')
-      const type = WEAPONS[item.WeaponType]
-      const subProperty = item.SecondPropId
-        ? propertyById.get(item.SecondPropId.Id)
-        : undefined
-      const subName = propertyName(item.SecondPropId?.Id)
-      const subValue = item.SecondPropId
-        ? formatPropertyValue(
-            subProperty,
-            item.SecondPropId.Value,
-            item.SecondPropId.IsRatio,
-          )
-        : ''
-      const baseAtk = item.FirstPropId?.Value
+  const baseWeapons = weaponRows.filter((item) => {
+    const name = clean(item.Name)
+    if (!name || seenWeaponNames.has(name)) return false
+    seenWeaponNames.add(name)
+    return true
+  })
+
+  let weaponDetailFailures = 0
+
+  const weapons = await mapLimit(
+    baseWeapons,
+    6,
+    async (item) => {
+      let detail = null
+
+      try {
+        detail = await cachedJson(
+          `weapons/${item.Id}.json`,
+          `${API}/weapon/${item.Id}`,
+        )
+      } catch (error) {
+        weaponDetailFailures += 1
+        console.warn(`[warn ] 武器 ${item.Id} 详情失败：${error.message}`)
+      }
+
+      const properties = asArray(detail?.Properties)
+      const baseAtk = properties.find((property) => property.Name === '攻击')
+      const subStat = properties.find((property) => property.Name !== '攻击')
 
       return {
-        id: String(item.ItemId),
-        name,
+        id: String(item.Id),
+        name: clean(item.Name),
         rarity: item.QualityId,
-        type,
-        baseAtk,
-        subStat: subName ? `${subName} ${subValue}`.trim() : undefined,
-        description:
-          applyParams(texts[item.Desc] || '', item.DescParams) || undefined,
-        _sort: subProperty?.Priority ?? 0,
+        type: weaponOf({ Id: item.Type, Name: item.TypeName }),
+        baseAtk: baseAtk?.BaseValue,
+        subStat: subStat ? formatWeaponStat(subStat) : undefined,
+        description: clean(detail?.Desc) || undefined,
+        icon: imageUrl(item.Icon),
+      }
+    },
+    '武器',
+  )
+
+  const echoGroups = new Map()
+
+  for (const echo of echoRows) {
+    for (const group of asArray(echo.FetterGroups)) {
+      if (!echoGroups.has(group.Id)) {
+        echoGroups.set(group.Id, {
+          id: String(group.Id),
+          name: clean(group.Name),
+          icon: imageUrl(group.Icon),
+          sampleEchoId: echo.Id,
+          elements: new Set(),
+          fetters: new Map(),
+        })
+      }
+
+      const entry = echoGroups.get(group.Id)
+      const element = elementOf(echo.Element)
+      if (element) entry.elements.add(element)
+
+      for (const fetter of asArray(group.Fetters)) {
+        entry.fetters.set(fetter.Key, clean(fetter.EffectDescription))
+      }
+    }
+  }
+
+  let echoDetailFailures = 0
+
+  const echoDetails = await mapLimit(
+    [...echoGroups.values()],
+    6,
+    async (group) => {
+      let detail = null
+
+      try {
+        detail = await cachedJson(
+          `echoes/${group.sampleEchoId}.json`,
+          `${API}/echo/${group.sampleEchoId}`,
+        )
+      } catch (error) {
+        echoDetailFailures += 1
+        console.warn(
+          `[warn ] 声骸 ${group.sampleEchoId} 详情失败：${error.message}`,
+        )
+      }
+
+      return { group, detail }
+    },
+    '声骸',
+  )
+
+  const echoes = echoDetails
+    .map(({ group, detail }) => {
+      const fetterDetails = detail?.FetterDetails?.[group.name]
+      const descriptions = asArray(fetterDetails?.EffectDescriptions)
+      const keys = asArray(fetterDetails?.EffectKeys)
+      const indexOf = (key) => keys.indexOf(key)
+      const twoIndex = indexOf(2)
+      const fiveIndex = indexOf(5)
+
+      const twoPiece = clean(
+        descriptions[twoIndex >= 0 ? twoIndex : 0] ||
+          group.fetters.get(2) ||
+          '',
+      )
+      const fivePiece = clean(
+        descriptions[fiveIndex >= 0 ? fiveIndex : 1] ||
+          group.fetters.get(5) ||
+          '',
+      )
+
+      return {
+        id: group.id,
+        name: group.name,
+        element:
+          elementFromIcon(group.icon) ||
+          elementFromText(`${twoPiece} ${fivePiece}`) ||
+          (group.elements.size === 1
+            ? [...group.elements][0]
+            : undefined),
+        twoPiece: twoPiece || undefined,
+        fivePiece: fivePiece || undefined,
+        icon: group.icon,
       }
     })
-    .filter((item) => item.name && item.type && !/^(test|测试)/i.test(item.name))
-    .filter((item) => {
-      if (seenWeaponNames.has(item.name)) return false
-      seenWeaponNames.add(item.name)
-      return true
-    })
+    .filter((echo) => echo.name && (echo.twoPiece || echo.fivePiece))
+    .sort((a, b) => a.id.localeCompare(b.id, 'zh-Hans', { numeric: true }))
+
+  const cleanCharacters = characters
+    .filter((item) => item.name && item.element && item.weapon)
     .sort(
       (a, b) =>
         b.rarity - a.rarity || a.name.localeCompare(b.name, 'zh-Hans'),
     )
-    .map(({ _sort, ...item }) => item)
 
-  const echoes = asArray(fetterGroup)
-    .map((group) => {
-      const name = cleanText(texts[group.FetterGroupName] || '')
-      const map = new Map(
-        (group.FetterMap || []).map((entry) => [entry.Key, entry.Value]),
-      )
-      const two = fetterById.get(map.get(2))
-      const five = fetterById.get(map.get(5))
-
-      return {
-        id: String(group.Id),
-        name,
-        element: elementFromPath(group.FetterElementPath),
-        twoPiece:
-          applyParams(
-            texts[two?.EffectDescription] || '',
-            two?.EffectDescriptionParam,
-          ) || undefined,
-        fivePiece:
-          applyParams(
-            texts[five?.EffectDescription] || '',
-            five?.EffectDescriptionParam,
-          ) || undefined,
-      }
-    })
-    .filter((item) => item.name && (item.twoPiece || item.fivePiece))
-    .sort((a, b) => a.id.localeCompare(b.id, 'zh-Hans', { numeric: true }))
+  const cleanWeapons = weapons
+    .filter((item) => item.name && item.type)
+    .sort(
+      (a, b) =>
+        b.rarity - a.rarity || a.name.localeCompare(b.name, 'zh-Hans'),
+    )
 
   let teams = []
   try {
-    teams = JSON.parse(
-      await readFile(join(outDir, 'teams.json'), 'utf8'),
-    )
+    teams = JSON.parse(await readFile(join(outDir, 'teams.json'), 'utf8'))
   } catch {
     teams = []
   }
 
   const meta = {
-    source:
-      'GitHub 数据快照：Arikatsu/WutheringWaves_Data + Dimbreath/WutheringData',
+    source: 'encore.moe 公开 API（zh-Hans）',
     generatedAt: new Date().toISOString().slice(0, 10),
     mock: false,
   }
@@ -302,12 +460,12 @@ async function main() {
   await Promise.all([
     writeFile(
       join(outDir, 'characters.json'),
-      `${JSON.stringify(characters, null, 2)}\n`,
+      `${JSON.stringify(cleanCharacters, null, 2)}\n`,
       'utf8',
     ),
     writeFile(
       join(outDir, 'weapons.json'),
-      `${JSON.stringify(weapons, null, 2)}\n`,
+      `${JSON.stringify(cleanWeapons, null, 2)}\n`,
       'utf8',
     ),
     writeFile(
@@ -328,11 +486,14 @@ async function main() {
   ])
 
   console.log(
-    `\n完成：角色 ${characters.length} / 武器 ${weapons.length} / 声骸套装 ${echoes.length}`,
+    `\n完成：角色 ${cleanCharacters.length} / 武器 ${cleanWeapons.length} / 声骸套装 ${echoes.length}`,
+  )
+  console.log(
+    `详情失败：角色 ${characterDetailFailures} / 武器 ${weaponDetailFailures} / 声骸 ${echoDetailFailures}`,
   )
   console.log(`快照已写入 ${outDir}`)
-  console.log('来源：Arikatsu/WutheringWaves_Data + Dimbreath/WutheringData')
-  console.log('声明：数据为社区挖掘内容，版权归库洛游戏所有，仅用于学习交流。')
+  console.log('来源：encore.moe 公开 API')
+  console.log('声明：数据为社区整理内容，版权归库洛游戏所有，仅用于学习交流。')
 }
 
 main().catch((error) => {

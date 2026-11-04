@@ -76,7 +76,7 @@ const activeName = computed(() => {
 
     <footer class="site-footer">
       <p>{{ SITE.disclaimer }}</p>
-      <p class="site-footer__meta">数据来源：GitHub 社区数据快照 · 非官方项目</p>
+      <p class="site-footer__meta">数据来源：encore.moe · 非官方项目</p>
     </footer>
   </div>
 </template>

@@ -86,7 +86,13 @@ function resetFilters() {
         :to="`/characters/${character.id}`"
       >
         <div class="character-card__avatar">
-          <img v-if="character.avatar" :src="character.avatar" :alt="character.name" />
+          <img
+            v-if="character.avatar"
+            :src="character.avatar"
+            :alt="character.name"
+            loading="lazy"
+            referrerpolicy="no-referrer"
+          />
           <span v-else>{{ character.name.slice(0, 1) }}</span>
         </div>
         <div class="character-card__body">

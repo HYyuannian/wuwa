@@ -2,7 +2,7 @@
 
 一个非官方的《鸣潮》数据看板，提供角色、武器、声骸与配队数据的检索和可视化。
 
-> 当前状态：**可运行版本**，已接入社区数据快照：47 名角色、81 把武器、23 套声骸。角色基础属性为 Lv.1 面板。
+> 当前状态：**可运行版本**，已接入社区数据快照：60 名角色、124 把武器、37 套声骸。角色含 Lv.1 基础面板、技能、头像与标签。
 
 ## 技术栈
 
@@ -24,7 +24,7 @@
 - [x] 接入 Element Plus、ECharts、Pinia、Vue Router
 - [x] 搭好布局、导航、深色模式、路由骨架
 - [x] 定义数据模型与本地快照加载层
-- [x] 替换失效的 hakush.in，改用 GitHub 社区数据仓库
+- [x] 改用 encore.moe 公开 API（无需账号）
 - [x] 编写 `scripts/import-data.mjs` 并生成第一份真实快照
 
 ### Day 1：角色模块（核心）
@@ -32,9 +32,9 @@
 - [x] 角色列表、搜索、属性 / 武器 / 稀有度筛选
 - [x] 角色详情页
 - [x] Lv.1 基础属性接入
-- [ ] 角色头像、立绘与图片缓存
-- [ ] 技能、突破材料字段适配
-- [ ] 排序与分页 / 虚拟滚动（数据量大时）
+- [ ] 角色头像接入（encore.moe 图片）
+- [ ] 技能字段适配
+- [ ] 突破材料与图片本地缓存
 
 ### Day 2：武器 / 声骸 / 配队 + 图表
 
@@ -116,24 +116,24 @@ npm run import:data:refresh # 强制重新下载全部源数据
 
 数据流：
 
-1. `scripts/import-data.mjs` 从 GitHub 下载源数据到 `.cache/wuwa/`。
+1. `scripts/import-data.mjs` 从 encore.moe 下载列表与详情到 `.cache/wuwa/encore/`。
 2. 脚本完成字段映射、去重、过滤，输出到 `public/data/`。
 3. 前端启动时加载快照，展示列表、筛选、详情和图表。
 4. 需要更新数据时重新运行 `npm run import:data:refresh`，再把生成的 JSON 一起提交。
 
 数据源：
 
-- [Arikatsu/WutheringWaves_Data](https://github.com/Arikatsu/WutheringWaves_Data)：游戏 3.7 角色与武器配置
-- [Dimbreath/WutheringData](https://github.com/Dimbreath/WutheringData)：简体中文文本、基础属性、声骸套装数据
+- [encore.moe](https://encore.moe)：角色 / 武器 / 声骸公开数据（zh-Hans）
+- 接口：`https://api.encore.moe/zh-Hans/character`、`/weapon`、`/echo`
 
 导入规则：
 
-- 只保留 4/5 星、正式角色（排除试用、子角色与测试条目）
-- 同名角色去重
-- 缺少中文译名的未上线角色 / 武器会被跳过
-- 角色属性取源数据的 Lv.1 基础面板
+- 角色与武器按名称去重，过滤缺少元素 / 武器类型的异常条目
+- 角色 / 武器详情逐条抓取并缓存，失败时自动回退到列表数据
+- 武器包含 1~5 星，稀有度筛选可覆盖全部条目
+- 角色属性取详情中的 Lv.1 基础面板，技能与标签同步导入
 
-> 社区数据可能滞后于游戏版本，也可能包含未上线内容。本项目在导入阶段做了过滤，但请以游戏内实际内容为准。
+> 社区数据可能滞后于游戏版本，也可能包含未上线内容。本项目在导入阶段做了去重与过滤，但请以游戏内实际内容为准。
 
 ## 部署
 
@@ -163,7 +163,7 @@ npm run import:data:refresh # 强制重新下载全部源数据
 
 ## 数据来源与免责声明
 
-- 数据来自社区公开数据挖掘项目：[Arikatsu/WutheringWaves_Data](https://github.com/Arikatsu/WutheringWaves_Data)、[Dimbreath/WutheringData](https://github.com/Dimbreath/WutheringData)
+- 数据来自社区公开项目：[encore.moe](https://encore.moe)
 - 本项目为非官方粉丝项目，与库洛游戏无关联。
 - 游戏名称、角色、图片等素材版权归原权利人所有，本项目仅用于学习与交流。
 - 如果数据源要求署名或删除内容，请通过 Issue 联系。

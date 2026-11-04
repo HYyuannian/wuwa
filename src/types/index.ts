@@ -47,7 +47,7 @@ export interface Character {
 export interface Weapon {
   id: string
   name: string
-  rarity: 4 | 5
+  rarity: 1 | 2 | 3 | 4 | 5
   type: WeaponType
   baseAtk?: number
   subStat?: string

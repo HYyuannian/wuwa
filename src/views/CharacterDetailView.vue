@@ -41,7 +41,13 @@ onMounted(() => {
     <template v-if="character">
       <section class="detail-head panel">
         <div class="detail-head__avatar">
-          <img v-if="character.avatar" :src="character.avatar" :alt="character.name" />
+          <img
+            v-if="character.avatar"
+            :src="character.avatar"
+            :alt="character.name"
+            loading="lazy"
+            referrerpolicy="no-referrer"
+          />
           <span v-else>{{ character.name.slice(0, 1) }}</span>
         </div>
         <div class="detail-head__body">
@@ -259,6 +265,7 @@ onMounted(() => {
 
 .skill-list p {
   font-size: 13px;
+  white-space: pre-line;
 }
 
 @media (max-width: 820px) {
