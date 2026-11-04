@@ -1,0 +1,173 @@
+# 鸣潮数据看板 · WUWA DATA
+
+一个非官方的《鸣潮》数据看板，提供角色、武器、声骸与配队数据的检索和可视化。
+
+> 当前状态：**可运行版本**，已接入社区数据快照：47 名角色、81 把武器、23 套声骸。角色基础属性为 Lv.1 面板。
+
+## 技术栈
+
+| 模块 | 选型 |
+| --- | --- |
+| 框架 | Vue 3 + TypeScript |
+| 构建 | Vite |
+| UI | Element Plus |
+| 图表 | ECharts + vue-echarts |
+| 状态 | Pinia |
+| 路由 | Vue Router（Hash 模式，兼容 GitHub Pages） |
+| 数据 | Node 导入脚本 + 构建时本地 JSON 快照 |
+
+## 三天排期
+
+### Day 0：数据源与工程初始化
+
+- [x] 初始化 Vite + Vue 3 + TS 工程
+- [x] 接入 Element Plus、ECharts、Pinia、Vue Router
+- [x] 搭好布局、导航、深色模式、路由骨架
+- [x] 定义数据模型与本地快照加载层
+- [x] 替换失效的 hakush.in，改用 GitHub 社区数据仓库
+- [x] 编写 `scripts/import-data.mjs` 并生成第一份真实快照
+
+### Day 1：角色模块（核心）
+
+- [x] 角色列表、搜索、属性 / 武器 / 稀有度筛选
+- [x] 角色详情页
+- [x] Lv.1 基础属性接入
+- [ ] 角色头像、立绘与图片缓存
+- [ ] 技能、突破材料字段适配
+- [ ] 排序与分页 / 虚拟滚动（数据量大时）
+
+### Day 2：武器 / 声骸 / 配队 + 图表
+
+- [x] 武器列表与筛选
+- [x] 声骸套装列表（2 件套 / 5 件套效果）
+- [x] 属性分布图
+- [ ] 武器详情与对比
+- [ ] 声骸主副词条与搭配推荐
+- [ ] 配队推荐（编辑器为可选项）
+- [ ] 稀有度占比 / 成长曲线等图表
+
+### Day 3：打磨与交付
+
+- [ ] 响应式细节、骨架屏、错误态
+- [ ] 部署 Vercel 或 GitHub Pages
+- [ ] README 截图 / GIF、在线 Demo 链接
+- [ ] 补充 LICENSE（建议 MIT）
+- [ ] 打 `v0.1.0` tag
+
+## 目录结构
+
+```text
+.
+├─ public/
+│  └─ data/                  # 构建时生成的数据快照（已提交）
+│     ├─ meta.json
+│     ├─ characters.json
+│     ├─ weapons.json
+│     ├─ echoes.json
+│     └─ teams.json
+├─ scripts/
+│  └─ import-data.mjs        # 下载并转换社区数据，生成快照
+├─ .cache/                   # 下载缓存（已 gitignore）
+├─ src/
+│  ├─ api/                   # 快照加载
+│  ├─ components/            # 通用组件
+│  ├─ constants/             # 属性 / 武器元数据
+│  ├─ layouts/               # 页面布局
+│  ├─ plugins/               # ECharts 按需注册
+│  ├─ router/                # 路由
+│  ├─ stores/                # Pinia（主题、数据集）
+│  ├─ styles/                # 全局样式与主题变量
+│  ├─ types/                 # 数据模型
+│  └─ views/                 # 页面
+├─ .github/workflows/        # GitHub Pages 自动部署
+└─ vite.config.ts            # 别名 / base
+```
+
+## 本地开发
+
+```bash
+npm install
+npm run dev
+```
+
+Windows PowerShell 如果提示 `npm.ps1` 被执行策略禁止，改用：
+
+```powershell
+npm.cmd install
+npm.cmd run dev
+```
+
+项目自带 `.npmrc`，默认使用 npmmirror（淘宝源），国内网络更稳定。
+
+常用命令：
+
+```bash
+npm run dev                 # 本地开发
+npm run build               # 类型检查 + 构建
+npm run typecheck           # 仅类型检查
+npm run preview             # 预览构建产物
+npm run import:data         # 生成 / 更新数据快照（优先用缓存）
+npm run import:data:refresh # 强制重新下载全部源数据
+```
+
+## 数据策略：构建时快照
+
+页面运行时**不请求任何第三方接口**，只读取 `public/data/*.json`。这样部署后不受接口下线、限流或跨域影响。
+
+数据流：
+
+1. `scripts/import-data.mjs` 从 GitHub 下载源数据到 `.cache/wuwa/`。
+2. 脚本完成字段映射、去重、过滤，输出到 `public/data/`。
+3. 前端启动时加载快照，展示列表、筛选、详情和图表。
+4. 需要更新数据时重新运行 `npm run import:data:refresh`，再把生成的 JSON 一起提交。
+
+数据源：
+
+- [Arikatsu/WutheringWaves_Data](https://github.com/Arikatsu/WutheringWaves_Data)：游戏 3.7 角色与武器配置
+- [Dimbreath/WutheringData](https://github.com/Dimbreath/WutheringData)：简体中文文本、基础属性、声骸套装数据
+
+导入规则：
+
+- 只保留 4/5 星、正式角色（排除试用、子角色与测试条目）
+- 同名角色去重
+- 缺少中文译名的未上线角色 / 武器会被跳过
+- 角色属性取源数据的 Lv.1 基础面板
+
+> 社区数据可能滞后于游戏版本，也可能包含未上线内容。本项目在导入阶段做了过滤，但请以游戏内实际内容为准。
+
+## 部署
+
+### Vercel（推荐）
+
+1. 导入 GitHub 仓库。
+2. 构建命令 `npm run build`，输出目录 `dist`。
+3. 纯静态部署，无需配置接口代理。
+
+### GitHub Pages（纯静态，兼容 Hash 路由）
+
+1. 仓库 Settings → Pages → Source 选择 **GitHub Actions**。
+2. 推送到 `main` 后，`.github/workflows/deploy.yml` 会自动构建部署。
+3. 如果是项目页（`https://<user>.github.io/<repo>/`），把 `VITE_BASE` 设为 `/<repo>/`。
+4. 在仓库 Variables 里配置 `VITE_REPO_URL`，导航栏会显示 GitHub 入口。
+
+## 验收清单
+
+- [x] 角色列表可搜索、筛选、进入详情
+- [x] 武器 / 声骸页面可用
+- [x] 属性分布图正常渲染
+- [x] 深色 / 浅色模式切换正常
+- [ ] 移动端细节打磨
+- [x] 数据更新不依赖运行时接口
+- [ ] README 含截图、在线地址、数据来源说明
+- [ ] 部署成功且有可访问链接
+
+## 数据来源与免责声明
+
+- 数据来自社区公开数据挖掘项目：[Arikatsu/WutheringWaves_Data](https://github.com/Arikatsu/WutheringWaves_Data)、[Dimbreath/WutheringData](https://github.com/Dimbreath/WutheringData)
+- 本项目为非官方粉丝项目，与库洛游戏无关联。
+- 游戏名称、角色、图片等素材版权归原权利人所有，本项目仅用于学习与交流。
+- 如果数据源要求署名或删除内容，请通过 Issue 联系。
+
+## License
+
+建议发布前补充 MIT License。

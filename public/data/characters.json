@@ -1,0 +1,801 @@
+[
+  {
+    "id": "1210",
+    "name": "爱弥斯",
+    "rarity": 5,
+    "element": "fusion",
+    "weapon": "sword",
+    "description": "星炬学院拉贝尔学部的隧者适格者，如今已成为在星海轻歌的电子幽灵。",
+    "stats": {
+      "level": 1,
+      "hp": 882,
+      "atk": 34,
+      "def": 94,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1203",
+    "name": "安可",
+    "rarity": 5,
+    "element": "fusion",
+    "weapon": "rectifier",
+    "description": "与黑白羊咩玩偶为伴的小女孩，黑海岸客卿安可，渴望用糖果、童话和幻想创造有着幸福结局的故事。",
+    "stats": {
+      "level": 1,
+      "hp": 841,
+      "atk": 34,
+      "def": 102,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1306",
+    "name": "奥古斯塔",
+    "rarity": 5,
+    "element": "electro",
+    "weapon": "broadblade",
+    "description": "七丘的现任总督。长照不灭的烈阳，所向披靡的旗帜。\n她来，她见，她征服。\n她高擎锋刃，等待着下一个挑战者，抑或是无可抗拒的命运。",
+    "stats": {
+      "level": 1,
+      "hp": 824,
+      "atk": 37,
+      "def": 91,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1206",
+    "name": "布兰特",
+    "rarity": 5,
+    "element": "fusion",
+    "weapon": "sword",
+    "description": "黎那汐塔愚人剧团的剧团长布兰特，为人浪漫洒脱，多变生动。是剧团的主心骨和领袖。\n舞台之上，他为故事更换面具，为戏剧调整表情。但在舞台之下，他待人只凭一颗真心。",
+    "stats": {
+      "level": 1,
+      "hp": 934,
+      "atk": 30,
+      "def": 107,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1411",
+    "name": "仇远",
+    "rarity": 5,
+    "element": "aero",
+    "weapon": "sword",
+    "description": "前明庭镇抚司千户，双眼失明的独行剑客。\n少时仇人无算，长时办差拿人，谁料蒙冤下狱，如今浪迹天涯。",
+    "stats": {
+      "level": 1,
+      "hp": 979,
+      "atk": 30,
+      "def": 98,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1603",
+    "name": "椿",
+    "rarity": 5,
+    "element": "havoc",
+    "weapon": "sword",
+    "description": "黑海岸的执花，自由随性、危险迷人的育种者。\n正在为黑海岸在索拉里斯各地旅行，寻找有潜力的人才。忠于自我，不遥望过去未来，只专注享受此时此刻的快乐。",
+    "stats": {
+      "level": 1,
+      "hp": 826,
+      "atk": 36,
+      "def": 95,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1506",
+    "name": "菲比",
+    "rarity": 5,
+    "element": "spectro",
+    "weapon": "rectifier",
+    "description": "隐海修会的教士菲比，友善而虔诚的圣职者少女，以纯粹之心修习，认真践行着身为教士的一切职责。她的祈祷恰如她手中的光芒，柔和明亮，为人们带来温暖与安宁。",
+    "stats": {
+      "level": 1,
+      "hp": 866,
+      "atk": 33,
+      "def": 103,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1608",
+    "name": "弗洛洛",
+    "rarity": 5,
+    "element": "havoc",
+    "weapon": "rectifier",
+    "description": "游走于生死之间的残星会会监，神秘而危险的指挥家……\n她沉默地挥舞指挥棒，手中调律频率演奏出的“灵魂”旋律，既可塑造美好的世界，也可唤来千军万马。",
+    "stats": {
+      "level": 1,
+      "hp": 862,
+      "atk": 35,
+      "def": 93,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1404",
+    "name": "忌炎",
+    "rarity": 5,
+    "element": "aero",
+    "weapon": "broadblade",
+    "description": "瑝珑夜归军的领军者，心藏正义，雷厉风行，具有将风场化为青龙的异能力，一人之力可抵万军。",
+    "stats": {
+      "level": 1,
+      "hp": 839,
+      "atk": 35,
+      "def": 97,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1208",
+    "name": "嘉贝莉娜",
+    "rarity": 5,
+    "element": "fusion",
+    "weapon": "pistols",
+    "description": "外表冷峻，杀伐果断，于索拉里斯四处游猎的“猎魔人”，亦是人们口中“永火的恶魔”。如今正作为黑海岸的客卿活跃于世界各地。",
+    "stats": {
+      "level": 1,
+      "hp": 824,
+      "atk": 37,
+      "def": 91,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1405",
+    "name": "鉴心",
+    "rarity": 5,
+    "element": "aero",
+    "weapon": "gauntlets",
+    "description": "一生只追求武术极致的道士，实力莫测、抱朴守一的风仪拳传人。拥有将周围环境气韵化为内在，形成涤净力场的能力。",
+    "stats": {
+      "level": 1,
+      "hp": 1129,
+      "atk": 27,
+      "def": 92,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1304",
+    "name": "今汐",
+    "rarity": 5,
+    "element": "spectro",
+    "weapon": "broadblade",
+    "description": "今令尹今汐，万丈天光被她化作点点辉芒，温柔地照亮人们的愿望。\n命运向她指明神灵的方向，但她脚下的道路，仍然通向人类的未来。",
+    "stats": {
+      "level": 1,
+      "hp": 866,
+      "atk": 33,
+      "def": 103,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1301",
+    "name": "卡卡罗",
+    "rarity": 5,
+    "element": "electro",
+    "weapon": "broadblade",
+    "description": "跨国独立雇佣兵组织“幽灵猎犬”的团长，心狠手辣，睚眦必报。拥有召唤特殊残象进行协同攻击的手段。\n想要雇佣他，必须有付出相应代价的觉悟。",
+    "stats": {
+      "level": 1,
+      "hp": 840,
+      "atk": 35,
+      "def": 97,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1409",
+    "name": "卡提希娅",
+    "rarity": 5,
+    "element": "aero",
+    "weapon": "sword",
+    "description": "于黎那汐塔四处旅行的流浪骑士卡提希娅。她是曾经的圣女，是神之容器，是风潮之王。她曾被唤作芙露德莉斯，但现在，她只是一介自由自在的流浪骑士。",
+    "stats": {
+      "level": 1,
+      "hp": 1184,
+      "atk": 25,
+      "def": 50,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1607",
+    "name": "坎特蕾拉",
+    "rarity": 5,
+    "element": "havoc",
+    "weapon": "rectifier",
+    "description": "翡萨烈现任家主，「毒药」坎特蕾拉。\n神秘、高贵、美艳、剧毒……她居于山巅的冠冕，而山崖间流淌着的，都是由她编织的幻梦。",
+    "stats": {
+      "level": 1,
+      "hp": 928,
+      "atk": 32,
+      "def": 90,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1107",
+    "name": "珂莱塔",
+    "rarity": 5,
+    "element": "glacio",
+    "weapon": "pistols",
+    "description": "莫塔里家族的二小姐，不被教条限制的艺术投资人。\n明面上，珂莱塔游走在交际与交易中，暗地里，她则为家族处理着不可明说的“麻烦”。\n一颗“宝石”的绽放，一场生命的凋零，她以自我为名，给予现实另一向度的重塑。",
+    "stats": {
+      "level": 1,
+      "hp": 996,
+      "atk": 37,
+      "def": 98,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1509",
+    "name": "琳奈",
+    "rarity": 5,
+    "element": "spectro",
+    "weapon": "pistols",
+    "description": "星炬学院的预科学生，个性张扬的外表下充满活力与力量。",
+    "stats": {
+      "level": 1,
+      "hp": 979,
+      "atk": 30,
+      "def": 98,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1104",
+    "name": "凌阳",
+    "rarity": 5,
+    "element": "glacio",
+    "weapon": "gauntlets",
+    "description": "今州瑞狮团成员，善良灵性的异族来客。热情开朗，勇敢正直，对人类抱有强烈的兴趣。拥有极强的体能与力量，始终在以自己的方式诠释着“狮子舞”的含义。",
+    "stats": {
+      "level": 1,
+      "hp": 831,
+      "atk": 35,
+      "def": 99,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1510",
+    "name": "陆·赫斯",
+    "rarity": 5,
+    "element": "spectro",
+    "weapon": "gauntlets",
+    "description": "星炬学院共鸣医疗科的主执校医，以聪明持稳著称，据说从未有人见过他失控的样子。\n擅于倾听与解构人心底的阴霾。而那道永不愈合的伤口中流淌的黄金血液，亦可化为最精准的刀刃。",
+    "stats": {
+      "level": 1,
+      "hp": 824,
+      "atk": 37,
+      "def": 91,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1207",
+    "name": "露帕",
+    "rarity": 5,
+    "element": "fusion",
+    "weapon": "broadblade",
+    "description": "七丘的角斗士，万众瞩目的明星选手。\n热情率直，如孤狼般具有野性的少女。若是能够一直享受竞技纯粹的快乐，露帕无畏在这赛场燃烧殆尽。",
+    "stats": {
+      "level": 1,
+      "hp": 953,
+      "atk": 31,
+      "def": 97,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1606",
+    "name": "洛可可",
+    "rarity": 5,
+    "element": "havoc",
+    "weapon": "gauntlets",
+    "description": "愚人剧团副手、万能道具师兼即兴喜剧演员洛可可将剧团打理得井井有条。\n她随身携带的珍奇箱似乎装有整个世界，又或者，是她用箱子构建了一个世界。",
+    "stats": {
+      "level": 1,
+      "hp": 980,
+      "atk": 30,
+      "def": 98,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1209",
+    "name": "莫宁",
+    "rarity": 5,
+    "element": "fusion",
+    "weapon": "broadblade",
+    "description": "深空联合研究院的工程师莫宁，同时在星炬学院隧者工学部担任教授。\n使用人造的双腿踏足大地，而心中是璀璨群星。",
+    "stats": {
+      "level": 1,
+      "hp": 1230,
+      "atk": 23,
+      "def": 111,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1406",
+    "name": "漂泊者·气动",
+    "rarity": 5,
+    "element": "aero",
+    "weapon": "sword",
+    "description": "身世不明的共鸣者，拥有吸收一切声音的力量。\n为了寻回记忆而踏上旅途。",
+    "stats": {
+      "level": 1,
+      "hp": 862,
+      "atk": 35,
+      "def": 93,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1604",
+    "name": "漂泊者·湮灭",
+    "rarity": 5,
+    "element": "havoc",
+    "weapon": "sword",
+    "description": "身世不明的共鸣者，拥有吸收一切声音的力量。\n为了寻回记忆而踏上旅途。",
+    "stats": {
+      "level": 1,
+      "hp": 866,
+      "atk": 33,
+      "def": 103,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1501",
+    "name": "漂泊者·衍射",
+    "rarity": 5,
+    "element": "spectro",
+    "weapon": "sword",
+    "description": "身世不明的共鸣者，拥有吸收一切声音的力量。\n为了寻回记忆而踏上旅途。",
+    "stats": {
+      "level": 1,
+      "hp": 912,
+      "atk": 30,
+      "def": 112,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1508",
+    "name": "千咲",
+    "rarity": 5,
+    "element": "havoc",
+    "weapon": "broadblade",
+    "description": "“普通学生而已。”\n她平静地自我介绍，瞳中隐约散溢出斑斓的光。于是万事万物的结构于视野里渐次明晰，她微微眯起眼睛，从中辨认出牵引着性命的那一根弦。",
+    "stats": {
+      "level": 1,
+      "hp": 862,
+      "atk": 35,
+      "def": 93,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1505",
+    "name": "守岸人",
+    "rarity": 5,
+    "element": "spectro",
+    "weapon": "rectifier",
+    "description": "守岸人，黑海岸的守护者，这种程度的说明对她便已足够。\n至于渴望、羁绊、情感……除职责外她所拥有的一切，都丰满于与你相遇之后。",
+    "stats": {
+      "level": 1,
+      "hp": 1337,
+      "atk": 23,
+      "def": 90,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1503",
+    "name": "维里奈",
+    "rarity": 5,
+    "element": "spectro",
+    "weapon": "rectifier",
+    "description": "具有丰富植物知识储备的育种员维里奈，总是微笑，始终温柔，用她的治愈之力呵护每一个朋友，希望所有的花朵都拥有生命的奇迹。",
+    "stats": {
+      "level": 1,
+      "hp": 1139,
+      "atk": 27,
+      "def": 90,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1407",
+    "name": "夏空",
+    "rarity": 5,
+    "element": "aero",
+    "weapon": "pistols",
+    "description": "黎那汐塔的吟游诗人——夏空。她为神明而歌，也为平凡的人类而歌。\n她于旅途中记录着故事，传唱着故事，与故事的主人，故事的观众一同欢笑、感动、流泪。",
+    "stats": {
+      "level": 1,
+      "hp": 979,
+      "atk": 30,
+      "def": 98,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1305",
+    "name": "相里要",
+    "rarity": 5,
+    "element": "electro",
+    "weapon": "gauntlets",
+    "description": "今州华胥研究院首席研究员，最年轻的全科学者。\n为人温和明理，对机关术研究有独特的见解与执着的追求。",
+    "stats": {
+      "level": 1,
+      "hp": 850,
+      "atk": 34,
+      "def": 100,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1302",
+    "name": "吟霖",
+    "rarity": 5,
+    "element": "electro",
+    "weapon": "rectifier",
+    "description": "吟霖是天生的共鸣者，也曾是治安署的优秀巡尉。但现在却因为一起案件被消去了夜归身份，只能在暗处独自调查着潜藏的罪恶。",
+    "stats": {
+      "level": 1,
+      "hp": 880,
+      "atk": 32,
+      "def": 105,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1410",
+    "name": "尤诺",
+    "rarity": 5,
+    "element": "aero",
+    "weapon": "gauntlets",
+    "description": "她被命运以怎样的名义青睐，就被命运以怎样的方式裹挟。\n但她从未被打败，也不肯罢休。\n所以，看吧……看忤逆的谕女，因何不再回望，看万千因果之间，她如何以自己为唯一的解。",
+    "stats": {
+      "level": 1,
+      "hp": 842,
+      "atk": 36,
+      "def": 92,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1507",
+    "name": "赞妮",
+    "rarity": 5,
+    "element": "spectro",
+    "weapon": "gauntlets",
+    "description": "埃弗拉德金库防卫科雇员，最佳员工称号的常年保持者。\n她为自己的业余时间做了无数种计划和安排，但事到如今，还是先想办法准时下班吧。",
+    "stats": {
+      "level": 1,
+      "hp": 862,
+      "atk": 35,
+      "def": 93,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1205",
+    "name": "长离",
+    "rarity": 5,
+    "element": "fusion",
+    "weapon": "sword",
+    "description": "今州令尹参事，前明庭中政省长史。\n终生浴火，总有一日会将己身燃烧殆尽的策士。为达成心中夙愿，她将自己置于棋盘之上，尽可能地算得更远。",
+    "stats": {
+      "level": 1,
+      "hp": 831,
+      "atk": 37,
+      "def": 90,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1105",
+    "name": "折枝",
+    "rarity": 5,
+    "element": "glacio",
+    "weapon": "rectifier",
+    "description": "鬻画维生的委托画师，忧思敏感，不善言辞，所思所想皆寄寓于画，笔下万物可幻化而出，惟妙惟肖。",
+    "stats": {
+      "level": 1,
+      "hp": 980,
+      "atk": 30,
+      "def": 98,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1103",
+    "name": "白芷",
+    "rarity": 4,
+    "element": "glacio",
+    "weapon": "rectifier",
+    "description": "白芷，主攻回音声态的华胥研究员。\n未能实现的愿望以另一种形式伴她左右，赋予她疗愈生命的能力，也成为她穷极一生研究的课题。",
+    "stats": {
+      "level": 1,
+      "hp": 1025,
+      "atk": 17,
+      "def": 82,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1307",
+    "name": "卜灵",
+    "rarity": 4,
+    "element": "electro",
+    "weapon": "rectifier",
+    "description": "瑝珑梦州方士，黑海岸客卿，风水大师，论坛冲浪高手。\n豁达开朗，云游四方，卜卦算命，万事皆灵。",
+    "stats": {
+      "level": 1,
+      "hp": 850,
+      "atk": 18,
+      "def": 103,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1202",
+    "name": "炽霞",
+    "rarity": 4,
+    "element": "fusion",
+    "weapon": "pistols",
+    "description": "今巡尉炽霞，她的热情就像燃不尽的炽火，永远活力满满地跃动在今州的大街小巷。\n她能将这份热情化作源源不断的子弹，从指尖倾泻而出。",
+    "stats": {
+      "level": 1,
+      "hp": 727,
+      "atk": 24,
+      "def": 78,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1602",
+    "name": "丹瑾",
+    "rarity": 4,
+    "element": "havoc",
+    "weapon": "sword",
+    "description": "游侠丹瑾，能将自身血液凝结成绯色的复仇之刃。\n执绯刃，明是非，灭贼寇，走天涯。",
+    "stats": {
+      "level": 1,
+      "hp": 755,
+      "atk": 21,
+      "def": 94,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1504",
+    "name": "灯灯",
+    "rarity": 4,
+    "element": "electro",
+    "weapon": "broadblade",
+    "description": "呜呜物流的领航员，运输队的小组长。\n出身越州的山中村落，真诚热情，如小太阳般照耀着他人的质朴少女。",
+    "stats": {
+      "level": 1,
+      "hp": 680,
+      "atk": 27,
+      "def": 72,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1204",
+    "name": "莫特斐",
+    "rarity": 4,
+    "element": "fusion",
+    "weapon": "pistols",
+    "description": "华胥研究院安全科成员，黑石应用领域专家，拥有将积压的情绪凝聚成火焰的能力。\n炽烈的红龙将于燃尽一切的怒火中降临。",
+    "stats": {
+      "level": 1,
+      "hp": 802,
+      "atk": 20,
+      "def": 93,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1403",
+    "name": "秋水",
+    "rarity": 4,
+    "element": "aero",
+    "weapon": "pistols",
+    "description": "秋水，如大雾一般令人捉摸不透。\n在雾的一面，他是笑脸相迎的情报商人，而另一面又与黑海岸有千丝万缕的联系。\n据说只要开出好价钱，就能从他手上买到称心如意的情报。",
+    "stats": {
+      "level": 1,
+      "hp": 788,
+      "atk": 21,
+      "def": 88,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1102",
+    "name": "散华",
+    "rarity": 4,
+    "element": "glacio",
+    "weapon": "sword",
+    "description": "隶属于今州边庭的令尹近卫，散华。曾是带来灾难、可洞穿世间万物的修罗，如今将肆虐风雪化为守护的力量，成为了寡言的守护者。",
+    "stats": {
+      "level": 1,
+      "hp": 805,
+      "atk": 22,
+      "def": 77,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1601",
+    "name": "桃祈",
+    "rarity": 4,
+    "element": "havoc",
+    "weapon": "broadblade",
+    "description": "天工边防事务的负责人，平时慵懒的她，却总能可靠地解决问题。\n守护他人的点点愿望汇聚成坚固的屏障，屹立于今州城前。",
+    "stats": {
+      "level": 1,
+      "hp": 716,
+      "atk": 18,
+      "def": 128,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1402",
+    "name": "秧秧",
+    "rarity": 4,
+    "element": "aero",
+    "weapon": "sword",
+    "description": "夜归下设临时调查员，秧秧。\n雀鸟迎风而行、飞向远方，受家境庇护顺遂成长的少女，如今正试图成为保护他人的力量。",
+    "stats": {
+      "level": 1,
+      "hp": 816,
+      "atk": 20,
+      "def": 90,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1106",
+    "name": "釉瑚",
+    "rarity": 4,
+    "element": "glacio",
+    "weapon": "gauntlets",
+    "description": "伶牙俐齿、古灵精怪的鉴宝师。\n能随口作出打油诗，把鉴宝结论说得妙趣横生、头头是道。为让古物流向珍爱它们的人，正在街头摆摊鉴宝。",
+    "stats": {
+      "level": 1,
+      "hp": 798,
+      "atk": 21,
+      "def": 86,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  },
+  {
+    "id": "1303",
+    "name": "渊武",
+    "rarity": 4,
+    "element": "electro",
+    "weapon": "gauntlets",
+    "description": "拳馆老板渊武，精通雷煌拳和养生术，为人处世颇为温和，有一种物质精神双重富足的余裕感，深受街坊邻居欢迎。",
+    "stats": {
+      "level": 1,
+      "hp": 682,
+      "atk": 18,
+      "def": 134,
+      "critRate": 5,
+      "critDamage": 150,
+      "energyRegen": 100
+    }
+  }
+]
