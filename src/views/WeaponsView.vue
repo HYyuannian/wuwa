@@ -140,7 +140,11 @@ function weaponLabel(value: WeaponType) {
 }
 
 .table-panel {
-  overflow: hidden;
+  overflow-x: auto;
+}
+
+.table-panel :deep(.el-table) {
+  min-width: 720px;
 }
 
 .rarity {

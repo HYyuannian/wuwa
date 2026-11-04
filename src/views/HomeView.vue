@@ -2,7 +2,9 @@
 import { computed } from 'vue'
 import ElementChart from '@/components/ElementChart.vue'
 import EmptyState from '@/components/EmptyState.vue'
+import RarityChart from '@/components/RarityChart.vue'
 import StatCard from '@/components/StatCard.vue'
+import WeaponTypeChart from '@/components/WeaponTypeChart.vue'
 import { useDatasetStore } from '@/stores/dataset'
 
 const store = useDatasetStore()
@@ -85,6 +87,34 @@ const generatedAt = computed(
         </p>
         <RouterLink class="text-link" to="/teams">了解配队模块 →</RouterLink>
       </aside>
+    </section>
+
+    <section class="home-grid home-grid--charts">
+      <div class="panel panel--padded">
+        <div class="section-head">
+          <h2>角色稀有度</h2>
+          <span class="muted">5 星 / 4 星</span>
+        </div>
+        <RarityChart v-if="store.stats.characters" />
+        <EmptyState
+          v-else
+          title="暂无角色数据"
+          description="运行 npm run import:data 后生成分布图。"
+        />
+      </div>
+
+      <div class="panel panel--padded">
+        <div class="section-head">
+          <h2>武器类型分布</h2>
+          <span class="muted">全部稀有度</span>
+        </div>
+        <WeaponTypeChart v-if="store.stats.weapons" />
+        <EmptyState
+          v-else
+          title="暂无武器数据"
+          description="运行 npm run import:data 后生成分布图。"
+        />
+      </div>
     </section>
   </div>
 </template>
@@ -208,6 +238,10 @@ const generatedAt = computed(
   margin-top: 16px;
 }
 
+.home-grid--charts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .section-head {
   display: flex;
   flex-wrap: wrap;
@@ -268,7 +302,8 @@ const generatedAt = computed(
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .home-grid {
+  .home-grid,
+  .home-grid--charts {
     grid-template-columns: 1fr;
   }
 
