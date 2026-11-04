@@ -150,8 +150,9 @@ npm run import:data:refresh # 强制重新下载全部源数据
 
 1. 仓库 Settings → Pages → Source 选择 **GitHub Actions**。
 2. 推送到 `main` 后，`.github/workflows/deploy.yml` 会自动构建部署。
-3. 如果是项目页（`https://<user>.github.io/<repo>/`），把 `VITE_BASE` 设为 `/<repo>/`。
-4. 在仓库 Variables 里配置 `VITE_REPO_URL`，导航栏会显示 GitHub 入口。
+3. 本项目使用相对路径 + Hash 路由，项目页无需额外设置 `VITE_BASE`。
+4. 启用后访问：https://hyyuannian.github.io/wuwa/
+5. 在仓库 Variables 里配置 `VITE_REPO_URL`，导航栏会显示 GitHub 入口。
 
 ## 验收清单
 
