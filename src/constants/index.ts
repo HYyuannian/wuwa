@@ -37,7 +37,8 @@ export const WEAPON_META: Record<WeaponType, { label: string }> = {
 export const SITE = {
   name: '鸣潮数据看板',
   subtitle: 'WUWA DATA',
-  repoUrl: import.meta.env.VITE_REPO_URL ?? '',
+  repoUrl:
+    import.meta.env.VITE_REPO_URL ?? 'https://github.com/HYyuannian/wuwa',
   disclaimer:
     '非官方粉丝项目，与库洛游戏无关联。游戏素材与数据版权归原权利人所有。数据来自社区公开数据挖掘项目，仅用于学习与交流。',
 }
