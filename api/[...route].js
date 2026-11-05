@@ -33822,37 +33822,27 @@ metaRoute.get("/", async (c2) => {
 var statsRoute = new Hono3();
 statsRoute.get("/", async (c2) => {
   const db = getDb();
-  const [
-    characterCountRows,
-    weaponCountRows,
-    echoCountRows,
-    elements,
-    rarities,
-    weaponTypes,
-    latestRows
-  ] = await Promise.all([
-    db.select({ count: sql`count(*)::int` }).from(characters),
-    db.select({ count: sql`count(*)::int` }).from(weapons),
-    db.select({ count: sql`count(*)::int` }).from(echoSets),
-    db.select({
-      key: characters.element,
-      count: sql`count(*)::int`
-    }).from(characters).groupBy(characters.element),
-    db.select({
-      key: characters.rarity,
-      count: sql`count(*)::int`
-    }).from(characters).groupBy(characters.rarity),
-    db.select({
-      key: weapons.type,
-      count: sql`count(*)::int`
-    }).from(weapons).groupBy(weapons.type),
-    db.select({
-      status: syncRuns.status,
-      startedAt: syncRuns.startedAt,
-      finishedAt: syncRuns.finishedAt,
-      counts: syncRuns.counts
-    }).from(syncRuns).orderBy(desc(syncRuns.startedAt)).limit(1)
-  ]);
+  const characterCountRows = await db.select({ count: sql`count(*)::int` }).from(characters);
+  const weaponCountRows = await db.select({ count: sql`count(*)::int` }).from(weapons);
+  const echoCountRows = await db.select({ count: sql`count(*)::int` }).from(echoSets);
+  const elements = await db.select({
+    key: characters.element,
+    count: sql`count(*)::int`
+  }).from(characters).groupBy(characters.element);
+  const rarities = await db.select({
+    key: characters.rarity,
+    count: sql`count(*)::int`
+  }).from(characters).groupBy(characters.rarity);
+  const weaponTypes = await db.select({
+    key: weapons.type,
+    count: sql`count(*)::int`
+  }).from(weapons).groupBy(weapons.type);
+  const latestRows = await db.select({
+    status: syncRuns.status,
+    startedAt: syncRuns.startedAt,
+    finishedAt: syncRuns.finishedAt,
+    counts: syncRuns.counts
+  }).from(syncRuns).orderBy(desc(syncRuns.startedAt)).limit(1);
   setCache(c2);
   return c2.json({
     counts: {
