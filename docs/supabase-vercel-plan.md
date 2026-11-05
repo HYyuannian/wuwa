@@ -11,7 +11,7 @@
 - [x] 数据库 Schema / Drizzle 配置
 - [x] 生成迁移：`drizzle/0000_rainy_zemo.sql`
 - [x] Encore 抓取与数据库同步模块（实测 60 / 124 / 37）
-- [x] 只读 API（Hono）
+- [x] 只读 API（Hono），`/api/health` 与 404 路由本地验证通过
 - [ ] Supabase 建库与迁移
 - [ ] Vercel 部署
 - [ ] 前端切换为 API 查询
