@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+﻿import { eq } from 'drizzle-orm'
 import { db } from '../db/client'
 import {
   characterRoles,
@@ -10,6 +10,7 @@ import {
   weapons,
 } from '../db/schema'
 import { fetchEncoreData, type EncoreData } from './encore'
+import { loadSnapshotData } from './snapshot'
 
 export interface SyncResult {
   runId: number
@@ -122,8 +123,11 @@ export async function replaceDatabase(
   })
 }
 
-export async function runSync(
-  trigger = 'manual',
+type DataLoader = () => Promise<EncoreData>
+
+async function syncWith(
+  trigger: string,
+  loadData: DataLoader,
 ): Promise<SyncResult> {
   const [run] = await db
     .insert(syncRuns)
@@ -131,8 +135,14 @@ export async function runSync(
     .returning({ id: syncRuns.id })
 
   try {
-    const data = await fetchEncoreData()
+    console.info('[sync] loading data')
+    const data = await loadData()
+    console.info(
+      `[sync] loaded characters=${data.counts.characters} weapons=${data.counts.weapons} echoes=${data.counts.echoes}`,
+    )
+    console.info('[sync] writing database')
     const counts = await replaceDatabase(data)
+    console.info('[sync] database written')
 
     await db
       .update(syncRuns)
@@ -160,3 +170,16 @@ export async function runSync(
     throw error
   }
 }
+
+export async function runSync(
+  trigger = 'manual',
+): Promise<SyncResult> {
+  return syncWith(trigger, fetchEncoreData)
+}
+
+export async function runSyncFromSnapshot(
+  trigger = 'manual',
+): Promise<SyncResult> {
+  return syncWith(trigger, () => loadSnapshotData())
+}
+

@@ -50,7 +50,7 @@ CORS_ORIGIN=http://localhost:5173,https://hyyuannian.github.io
 
 ```bash
 npm run db:migrate
-npm run sync:db
+npm run sync:db -- --snapshot   # 首次用仓库快照快速入库
 npm run db:check
 ```
 

@@ -1,9 +1,17 @@
 import 'dotenv/config'
-import { runSync } from '../server/lib/sync'
+import { runSync, runSyncFromSnapshot } from '../server/lib/sync'
+
+const useSnapshot = process.argv.includes('--snapshot')
 
 try {
-  const result = await runSync('manual')
-  console.log('[sync] success', result)
+  const result = useSnapshot
+    ? await runSyncFromSnapshot('manual')
+    : await runSync('manual')
+
+  console.log(
+    `[sync] success (${useSnapshot ? 'snapshot' : 'encore'})`,
+    result,
+  )
 } catch (error) {
   console.error('[sync] failed', error)
   process.exitCode = 1

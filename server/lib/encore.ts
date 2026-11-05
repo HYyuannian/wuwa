@@ -321,9 +321,11 @@ async function mapLimit<T, R>(
   items: T[],
   limit: number,
   mapper: (item: T, index: number) => Promise<R>,
+  label: string,
 ): Promise<R[]> {
   const results = new Array<R>(items.length)
   let cursor = 0
+  let completed = 0
 
   async function worker() {
     while (true) {
@@ -331,6 +333,12 @@ async function mapLimit<T, R>(
       cursor += 1
       if (index >= items.length) return
       results[index] = await mapper(items[index], index)
+      completed += 1
+      if (completed % 20 === 0 || completed === items.length) {
+        console.info(
+          `[encore] ${label} ${completed}/${items.length}`,
+        )
+      }
     }
   }
 
@@ -397,7 +405,7 @@ export async function fetchEncoreData(): Promise<EncoreData> {
       stats: buildStats(asArray(detail?.Properties)),
       skills,
     } satisfies EncoreCharacter
-  })
+  }, 'characters')
 
   const seenWeaponNames = new Set<string>()
   const baseWeapons = weaponRows.filter((item) => {
@@ -439,7 +447,7 @@ export async function fetchEncoreData(): Promise<EncoreData> {
       description: clean(detail?.Desc) || undefined,
       iconUrl: imageUrl(item.Icon),
     } satisfies EncoreWeapon
-  })
+  }, 'weapons')
 
   const echoGroups = new Map<
     number,
@@ -498,6 +506,7 @@ export async function fetchEncoreData(): Promise<EncoreData> {
 
       return { group, detail }
     },
+    'echoes',
   )
 
   const echoes = echoDetails

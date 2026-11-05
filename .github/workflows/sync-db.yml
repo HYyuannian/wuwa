@@ -17,4 +17,4 @@ jobs:
       - run: npm ci
       - run: npm run sync:db
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DIRECT_URL }}
