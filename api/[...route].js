@@ -33916,11 +33916,17 @@ weaponsRoute.get("/:id", async (c2) => {
 
 // server/app.ts
 var app = new Hono3().basePath("/api");
-var origins2 = process.env.CORS_ORIGIN?.split(",").map((origin) => origin.trim()).filter(Boolean);
+var configuredOrigins = process.env.CORS_ORIGIN?.trim();
+var origins2 = !configuredOrigins || configuredOrigins === "*" ? "*" : Array.from(
+  /* @__PURE__ */ new Set([
+    ...configuredOrigins.split(",").map((origin) => origin.trim()).filter(Boolean),
+    "https://hyyuannian.github.io"
+  ])
+);
 app.use(
   "*",
   cors({
-    origin: origins2?.length ? origins2 : "*",
+    origin: origins2,
     allowMethods: ["GET", "POST", "OPTIONS"]
   })
 );

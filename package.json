@@ -21,6 +21,7 @@
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
     "@hono/zod-validator": "^0.9.1",
+    "@tanstack/vue-query": "^5.106.1",
     "dotenv": "^18.0.9",
     "drizzle-orm": "^0.45.4",
     "echarts": "^6.1.0",

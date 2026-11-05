@@ -1,47 +1,89 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import EmptyState from '@/components/EmptyState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import { useDebouncedRef } from '@/composables/useDebouncedRef'
 import { WEAPON_META, WEAPON_ORDER } from '@/constants'
-import { useDatasetStore } from '@/stores/dataset'
+import { useWeaponsQuery } from '@/queries/useWeapons'
 import type { WeaponType } from '@/types'
 
-const store = useDatasetStore()
+const route = useRoute()
+const router = useRouter()
 
-const keyword = ref('')
-const type = ref<WeaponType | ''>('')
-const rarity = ref<number | ''>('')
+const keyword = ref(
+  typeof route.query.q === 'string' ? route.query.q : '',
+)
+const type = ref<WeaponType | ''>(
+  (route.query.type as WeaponType) || '',
+)
+const rarity = ref<number | ''>(
+  route.query.rarity ? Number(route.query.rarity) : '',
+)
+const page = ref(Math.max(1, Number(route.query.page) || 1))
+const pageSize = 24
+const debouncedKeyword = useDebouncedRef(keyword, 300)
 
-const filtered = computed(() => {
-  const key = keyword.value.trim().toLowerCase()
-  return store.dataset.weapons.filter((weapon) => {
-    if (key && !weapon.name.toLowerCase().includes(key)) return false
-    if (type.value && weapon.type !== type.value) return false
-    if (rarity.value && weapon.rarity !== rarity.value) return false
-    return true
-  })
+const query = useWeaponsQuery(
+  computed(() => ({
+    q: debouncedKeyword.value.trim(),
+    type: type.value,
+    rarity: rarity.value,
+    page: page.value,
+    pageSize,
+  })),
+)
+
+const items = computed(() => query.data.value?.items ?? [])
+const total = computed(() => query.data.value?.total ?? 0)
+const isLoading = query.isLoading
+const isFetching = query.isFetching
+const isError = query.isError
+const hasFilter = computed(() =>
+  Boolean(keyword.value || type.value || rarity.value),
+)
+
+watch([debouncedKeyword, type, rarity], () => {
+  page.value = 1
 })
 
-const hasFilter = computed(
-  () => Boolean(keyword.value || type.value || rarity.value),
+watch(
+  [debouncedKeyword, type, rarity, page],
+  () => {
+    const nextQuery: Record<string, string> = {}
+
+    if (debouncedKeyword.value.trim()) nextQuery.q = debouncedKeyword.value.trim()
+    if (type.value) nextQuery.type = type.value
+    if (rarity.value) nextQuery.rarity = String(rarity.value)
+    if (page.value > 1) nextQuery.page = String(page.value)
+
+    void router.replace({ query: nextQuery })
+  },
+  { deep: true },
 )
 
 function resetFilters() {
   keyword.value = ''
   type.value = ''
   rarity.value = ''
+  page.value = 1
 }
 
 function weaponLabel(value: WeaponType) {
   return WEAPON_META[value]?.label ?? value
 }
+
+function hideOnError(event: Event) {
+  const image = event.target as HTMLImageElement
+  image.style.display = 'none'
+}
 </script>
 
 <template>
   <div class="page">
-    <PageHeader title="武器" description="按类型与稀有度检索武器，详情字段随数据接入补全。">
+    <PageHeader title="武器" description="按类型与稀有度检索武器，数据来自 Supabase。">
       <template #actions>
-        <el-button :loading="store.loading" @click="store.ensureLoaded(true)">
+        <el-button :loading="isFetching" @click="query.refetch()">
           刷新数据
         </el-button>
       </template>
@@ -70,11 +112,23 @@ function weaponLabel(value: WeaponType) {
         <el-option label="1 星" :value="1" />
       </el-select>
       <el-button v-if="hasFilter" text @click="resetFilters">重置</el-button>
-      <span class="muted result-count">共 {{ filtered.length }} 把武器</span>
+      <span class="muted result-count">共 {{ total }} 把武器</span>
     </div>
 
-    <div v-if="filtered.length" class="panel table-panel">
-      <el-table :data="filtered" stripe style="width: 100%">
+    <div v-if="isLoading && !items.length" class="panel panel--padded loading-panel">
+      正在加载武器数据…
+    </div>
+
+    <EmptyState
+      v-else-if="isError"
+      title="武器数据加载失败"
+      description="请检查 API 连接，或稍后重试。"
+    >
+      <el-button @click="query.refetch()">重试</el-button>
+    </EmptyState>
+
+    <div v-else-if="items.length" class="panel table-panel">
+      <el-table :data="items" stripe style="width: 100%">
         <el-table-column label="" width="58" align="center">
           <template #default="{ row }">
             <img
@@ -83,6 +137,8 @@ function weaponLabel(value: WeaponType) {
               :src="row.icon"
               :alt="row.name"
               loading="lazy"
+              referrerpolicy="no-referrer"
+              @error="hideOnError"
             />
             <span v-else class="weapon-icon weapon-icon--empty">武</span>
           </template>
@@ -113,11 +169,21 @@ function weaponLabel(value: WeaponType) {
       :description="
         hasFilter
           ? '试试放宽筛选条件，或重置筛选。'
-          : '运行 npm run import:data 生成真实武器快照。'
+          : '数据同步完成后会显示在这里。'
       "
     >
       <el-button v-if="hasFilter" @click="resetFilters">重置筛选</el-button>
     </EmptyState>
+
+    <div v-if="total > pageSize" class="pagination">
+      <el-pagination
+        v-model:current-page="page"
+        :page-size="pageSize"
+        :total="total"
+        layout="prev, pager, next"
+        background
+      />
+    </div>
   </div>
 </template>
 
@@ -137,6 +203,14 @@ function weaponLabel(value: WeaponType) {
 .result-count {
   margin-left: auto;
   font-size: 13px;
+}
+
+.loading-panel {
+  min-height: 160px;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  font-size: 14px;
 }
 
 .table-panel {
@@ -168,6 +242,12 @@ function weaponLabel(value: WeaponType) {
   place-items: center;
   color: var(--text-muted);
   font-size: 12px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
 }
 
 @media (max-width: 600px) {

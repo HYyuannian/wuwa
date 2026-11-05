@@ -1,12 +1,12 @@
 <script setup lang="ts">
+import type { EChartsOption } from 'echarts'
 import { computed } from 'vue'
 import VChart from 'vue-echarts'
-import type { EChartsOption } from 'echarts'
+import { useStatsQuery } from '@/queries/useStats'
 import { useAppStore } from '@/stores/app'
-import { useDatasetStore } from '@/stores/dataset'
 
 const appStore = useAppStore()
-const store = useDatasetStore()
+const statsQuery = useStatsQuery()
 
 const textColor = computed(() =>
   appStore.theme === 'dark' ? '#9aa3b2' : '#6b7280',
@@ -16,13 +16,13 @@ const surfaceColor = computed(() =>
   appStore.theme === 'dark' ? '#161a22' : '#fffdf8',
 )
 
+const countOf = (rarity: number) =>
+  statsQuery.data.value?.rarities.find((item) => item.key === rarity)
+    ?.count ?? 0
+
 const option = computed<EChartsOption>(() => {
-  const five = store.dataset.characters.filter(
-    (character) => character.rarity === 5,
-  ).length
-  const four = store.dataset.characters.filter(
-    (character) => character.rarity === 4,
-  ).length
+  const five = countOf(5)
+  const four = countOf(4)
 
   return {
     tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },

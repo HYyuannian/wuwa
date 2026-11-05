@@ -5,14 +5,27 @@ import EmptyState from '@/components/EmptyState.vue'
 import RarityChart from '@/components/RarityChart.vue'
 import StatCard from '@/components/StatCard.vue'
 import WeaponTypeChart from '@/components/WeaponTypeChart.vue'
-import { useDatasetStore } from '@/stores/dataset'
+import { useStatsQuery } from '@/queries/useStats'
 
-const store = useDatasetStore()
+const query = useStatsQuery()
 
-const isMock = computed(() => store.dataset.meta.mock)
-const generatedAt = computed(
-  () => store.dataset.meta.generatedAt || '尚未生成',
+const counts = computed(
+  () =>
+    query.data.value?.counts ?? {
+      characters: 0,
+      weapons: 0,
+      echoes: 0,
+    },
 )
+const meta = computed(() => query.data.value?.meta ?? null)
+const updatedAt = computed(() => {
+  const value = meta.value?.finishedAt ?? meta.value?.startedAt
+  return value ? new Date(value).toLocaleString('zh-CN') : '尚未同步'
+})
+const isLoading = query.isLoading
+const isError = query.isError
+const hasCharacters = computed(() => counts.value.characters > 0)
+const hasWeapons = computed(() => counts.value.weapons > 0)
 </script>
 
 <template>
@@ -22,8 +35,8 @@ const generatedAt = computed(
         <span class="tag tag--brand">非官方粉丝项目</span>
         <h1>鸣潮数据看板</h1>
         <p class="hero__desc">
-          角色、武器、声骸与配队的一站式检索与可视化。当前为可运行骨架，
-          数据层使用本地快照，构建前从社区数据仓库生成。
+          角色、武器、声骸与配队的一站式检索与可视化。数据来自 Supabase，
+          页面只读查询，不再打包游戏数据。
         </p>
         <div class="hero__actions">
           <RouterLink class="btn btn--primary" to="/characters">
@@ -37,19 +50,21 @@ const generatedAt = computed(
       </div>
     </section>
 
-    <div v-if="isMock" class="notice">
-      <strong>当前为示例数据</strong>
-      <span>
-        运行 <code>npm run import:data</code> 从社区数据仓库生成
-        <code>public/data</code> 下的真实快照。
-      </span>
+    <div v-if="isError" class="notice">
+      <strong>数据加载失败</strong>
+      <span>请检查 API 连接，或稍后重试。</span>
+      <el-button size="small" @click="query.refetch()">重试</el-button>
     </div>
 
     <section class="stat-grid">
-      <StatCard label="角色" :value="store.stats.characters" hint="属性 / 武器 / 稀有度筛选" />
-      <StatCard label="武器" :value="store.stats.weapons" hint="按武器类型检索" />
-      <StatCard label="声骸套装" :value="store.stats.echoes" hint="套装效果与搭配" />
-      <StatCard label="配队" :value="store.stats.teams" hint="Day 2 扩展模块" />
+      <StatCard
+        label="角色"
+        :value="counts.characters"
+        hint="属性 / 武器 / 稀有度筛选"
+      />
+      <StatCard label="武器" :value="counts.weapons" hint="按武器类型检索" />
+      <StatCard label="声骸套装" :value="counts.echoes" hint="套装效果与搭配" />
+      <StatCard label="配队" :value="0" hint="模块规划中" />
     </section>
 
     <section class="home-grid">
@@ -58,11 +73,12 @@ const generatedAt = computed(
           <h2>属性分布</h2>
           <span class="muted">按角色数量统计</span>
         </div>
-        <ElementChart v-if="store.stats.characters" />
+        <ElementChart v-if="hasCharacters" />
+        <p v-else-if="isLoading" class="muted chart-loading">加载中…</p>
         <EmptyState
           v-else
           title="暂无角色数据"
-          description="运行 npm run import:data 后，这里会显示属性分布图。"
+          description="数据同步完成后，这里会显示属性分布图。"
         />
       </div>
 
@@ -71,19 +87,19 @@ const generatedAt = computed(
         <dl class="meta-list">
           <div>
             <dt>数据来源</dt>
-            <dd>{{ store.dataset.meta.source }}</dd>
+            <dd>Supabase / encore.moe</dd>
           </div>
           <div>
-            <dt>快照时间</dt>
-            <dd>{{ generatedAt }}</dd>
+            <dt>最近同步</dt>
+            <dd>{{ updatedAt }}</dd>
           </div>
           <div>
-            <dt>运行模式</dt>
-            <dd>{{ isMock ? '示例 / 待接入' : '真实快照' }}</dd>
+            <dt>同步状态</dt>
+            <dd>{{ meta?.status ?? '未知' }}</dd>
           </div>
         </dl>
         <p class="muted side__note">
-          页面读取构建时生成的 <code>public/data</code> 快照，部署后不依赖第三方接口。
+          前端通过 <code>/api</code> 只读查询，角色、武器和声骸数据都存储在 Supabase。
         </p>
         <RouterLink class="text-link" to="/teams">了解配队模块 →</RouterLink>
       </aside>
@@ -95,11 +111,12 @@ const generatedAt = computed(
           <h2>角色稀有度</h2>
           <span class="muted">5 星 / 4 星</span>
         </div>
-        <RarityChart v-if="store.stats.characters" />
+        <RarityChart v-if="hasCharacters" />
+        <p v-else-if="isLoading" class="muted chart-loading">加载中…</p>
         <EmptyState
           v-else
           title="暂无角色数据"
-          description="运行 npm run import:data 后生成分布图。"
+          description="数据同步完成后生成分布图。"
         />
       </div>
 
@@ -108,11 +125,12 @@ const generatedAt = computed(
           <h2>武器类型分布</h2>
           <span class="muted">全部稀有度</span>
         </div>
-        <WeaponTypeChart v-if="store.stats.weapons" />
+        <WeaponTypeChart v-if="hasWeapons" />
+        <p v-else-if="isLoading" class="muted chart-loading">加载中…</p>
         <EmptyState
           v-else
           title="暂无武器数据"
-          description="运行 npm run import:data 后生成分布图。"
+          description="数据同步完成后生成分布图。"
         />
       </div>
     </section>
@@ -295,6 +313,13 @@ const generatedAt = computed(
   color: var(--brand-strong);
   font-size: 13px;
   font-weight: 600;
+}
+
+.chart-loading {
+  display: grid;
+  place-items: center;
+  height: 240px;
+  font-size: 13px;
 }
 
 @media (max-width: 900px) {

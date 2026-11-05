@@ -1,25 +1,47 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import EmptyState from '@/components/EmptyState.vue'
 import ElementTag from '@/components/ElementTag.vue'
 import PageHeader from '@/components/PageHeader.vue'
-import { useDatasetStore } from '@/stores/dataset'
+import { useEchoesQuery } from '@/queries/useEchoes'
 
-const store = useDatasetStore()
+const query = useEchoesQuery()
+const echoes = computed(() => query.data.value?.items ?? [])
+const isLoading = query.isLoading
+const isFetching = query.isFetching
+const isError = query.isError
+
+function hideOnError(event: Event) {
+  const image = event.target as HTMLImageElement
+  image.style.display = 'none'
+}
 </script>
 
 <template>
   <div class="page">
-    <PageHeader title="声骸" description="声骸套装与效果汇总。套装搭配推荐计划在 Day 2 完成。">
+    <PageHeader title="声骸" description="声骸套装与效果汇总，数据来自 Supabase。">
       <template #actions>
-        <el-button :loading="store.loading" @click="store.ensureLoaded(true)">
+        <el-button :loading="isFetching" @click="query.refetch()">
           刷新数据
         </el-button>
       </template>
     </PageHeader>
 
-    <div v-if="store.dataset.echoes.length" class="echo-grid">
+    <div v-if="isLoading && !echoes.length" class="panel panel--padded loading-panel">
+      正在加载声骸数据…
+    </div>
+
+    <EmptyState
+      v-else-if="isError"
+      title="声骸数据加载失败"
+      description="请检查 API 连接，或稍后重试。"
+    >
+      <el-button @click="query.refetch()">重试</el-button>
+    </EmptyState>
+
+    <div v-else-if="echoes.length" class="echo-grid">
       <article
-        v-for="echo in store.dataset.echoes"
+        v-for="echo in echoes"
         :key="echo.id"
         class="echo-card panel panel--padded"
       >
@@ -31,6 +53,8 @@ const store = useDatasetStore()
               :src="echo.icon"
               :alt="echo.name"
               loading="lazy"
+              referrerpolicy="no-referrer"
+              @error="hideOnError"
             />
             <h2>{{ echo.name }}</h2>
           </div>
@@ -52,12 +76,20 @@ const store = useDatasetStore()
     <EmptyState
       v-else
       title="暂无声骸数据"
-      description="运行 npm run import:data 从社区数据仓库生成声骸快照。"
+      description="数据同步完成后会显示在这里。"
     />
   </div>
 </template>
 
 <style scoped>
+.loading-panel {
+  min-height: 160px;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
 .echo-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

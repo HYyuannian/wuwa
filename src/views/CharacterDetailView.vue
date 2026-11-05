@@ -1,16 +1,24 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { ApiError } from '@/api/http'
 import ElementTag from '@/components/ElementTag.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import { WEAPON_META } from '@/constants'
-import { useDatasetStore } from '@/stores/dataset'
+import { useCharacterQuery } from '@/queries/useCharacters'
 
 const route = useRoute()
-const store = useDatasetStore()
+const id = computed(() => String(route.params.id))
+const query = useCharacterQuery(id)
 
-const character = computed(() => store.getCharacter(String(route.params.id)))
-
+const character = computed(() => query.data.value)
+const isLoading = query.isLoading
+const isError = query.isError
+const isNotFound = computed(
+  () =>
+    query.error.value instanceof ApiError &&
+    query.error.value.status === 404,
+)
 const statEntries = computed(() => {
   const stats = character.value?.stats
   if (!stats) return []
@@ -27,11 +35,10 @@ const statEntries = computed(() => {
   )
 })
 
-onMounted(() => {
-  if (!store.loaded) {
-    void store.ensureLoaded()
-  }
-})
+function hideOnError(event: Event) {
+  const image = event.target as HTMLImageElement
+  image.style.display = 'none'
+}
 </script>
 
 <template>
@@ -47,6 +54,7 @@ onMounted(() => {
             :alt="character.name"
             loading="lazy"
             referrerpolicy="no-referrer"
+            @error="hideOnError"
           />
           <span v-else>{{ character.name.slice(0, 1) }}</span>
         </div>
@@ -80,9 +88,7 @@ onMounted(() => {
               <dd>{{ item.value }}{{ item.suffix ?? '' }}</dd>
             </div>
           </dl>
-          <p v-else class="muted">
-            该角色暂缺基础属性，重新运行 npm run import:data 可更新快照。
-          </p>
+          <p v-else class="muted">该角色暂缺基础属性。</p>
         </section>
 
         <section class="panel panel--padded">
@@ -102,17 +108,25 @@ onMounted(() => {
     </template>
 
     <EmptyState
-      v-else-if="store.loading"
+      v-else-if="isLoading"
       title="正在加载角色数据"
       description="请稍候。"
     />
 
     <EmptyState
-      v-else
+      v-else-if="isNotFound"
       title="没有找到这个角色"
-      description="角色 ID 可能不正确，或者快照里还没有这名角色。"
+      description="角色 ID 可能不正确，或者数据库里还没有这名角色。"
     >
       <RouterLink class="tag tag--brand" to="/characters">返回角色列表</RouterLink>
+    </EmptyState>
+
+    <EmptyState
+      v-else-if="isError"
+      title="角色数据加载失败"
+      description="请检查 API 连接，或稍后重试。"
+    >
+      <el-button @click="query.refetch()">重试</el-button>
     </EmptyState>
   </div>
 </template>

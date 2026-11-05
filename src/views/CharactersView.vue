@@ -1,32 +1,76 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import ElementTag from '@/components/ElementTag.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import PageHeader from '@/components/PageHeader.vue'
-import { ELEMENT_META, ELEMENT_ORDER, WEAPON_META, WEAPON_ORDER } from '@/constants'
-import { useDatasetStore } from '@/stores/dataset'
+import { useDebouncedRef } from '@/composables/useDebouncedRef'
+import {
+  ELEMENT_META,
+  ELEMENT_ORDER,
+  WEAPON_META,
+  WEAPON_ORDER,
+} from '@/constants'
+import { useCharactersQuery } from '@/queries/useCharacters'
 import type { ElementKey, WeaponType } from '@/types'
 
-const store = useDatasetStore()
+const route = useRoute()
+const router = useRouter()
 
-const keyword = ref('')
-const element = ref<ElementKey | ''>('')
-const weapon = ref<WeaponType | ''>('')
-const rarity = ref<number | ''>('')
+const keyword = ref(
+  typeof route.query.q === 'string' ? route.query.q : '',
+)
+const element = ref<ElementKey | ''>(
+  (route.query.element as ElementKey) || '',
+)
+const weapon = ref<WeaponType | ''>(
+  (route.query.weapon as WeaponType) || '',
+)
+const rarity = ref<number | ''>(
+  route.query.rarity ? Number(route.query.rarity) : '',
+)
+const page = ref(Math.max(1, Number(route.query.page) || 1))
+const pageSize = 24
+const debouncedKeyword = useDebouncedRef(keyword, 300)
 
-const filtered = computed(() => {
-  const key = keyword.value.trim().toLowerCase()
-  return store.dataset.characters.filter((character) => {
-    if (key && !character.name.toLowerCase().includes(key)) return false
-    if (element.value && character.element !== element.value) return false
-    if (weapon.value && character.weapon !== weapon.value) return false
-    if (rarity.value && character.rarity !== rarity.value) return false
-    return true
-  })
+const query = useCharactersQuery(
+  computed(() => ({
+    q: debouncedKeyword.value.trim(),
+    element: element.value,
+    weapon: weapon.value,
+    rarity: rarity.value,
+    page: page.value,
+    pageSize,
+  })),
+)
+
+const items = computed(() => query.data.value?.items ?? [])
+const total = computed(() => query.data.value?.total ?? 0)
+const isLoading = query.isLoading
+const isFetching = query.isFetching
+const isError = query.isError
+const hasFilter = computed(() =>
+  Boolean(keyword.value || element.value || weapon.value || rarity.value),
+)
+
+watch([debouncedKeyword, element, weapon, rarity], () => {
+  page.value = 1
 })
 
-const hasFilter = computed(
-  () => Boolean(keyword.value || element.value || weapon.value || rarity.value),
+watch(
+  [debouncedKeyword, element, weapon, rarity, page],
+  () => {
+    const nextQuery: Record<string, string> = {}
+
+    if (debouncedKeyword.value.trim()) nextQuery.q = debouncedKeyword.value.trim()
+    if (element.value) nextQuery.element = element.value
+    if (weapon.value) nextQuery.weapon = weapon.value
+    if (rarity.value) nextQuery.rarity = String(rarity.value)
+    if (page.value > 1) nextQuery.page = String(page.value)
+
+    void router.replace({ query: nextQuery })
+  },
+  { deep: true },
 )
 
 function resetFilters() {
@@ -34,6 +78,16 @@ function resetFilters() {
   element.value = ''
   weapon.value = ''
   rarity.value = ''
+  page.value = 1
+}
+
+function hideOnError(event: Event) {
+  const image = event.target as HTMLImageElement
+  image.style.display = 'none'
+}
+
+function weaponLabel(value: WeaponType) {
+  return WEAPON_META[value]?.label ?? value
 }
 </script>
 
@@ -41,7 +95,7 @@ function resetFilters() {
   <div class="page">
     <PageHeader title="角色" description="按属性、武器与稀有度筛选，点击卡片查看详情。">
       <template #actions>
-        <el-button :loading="store.loading" @click="store.ensureLoaded(true)">
+        <el-button :loading="isFetching" @click="query.refetch()">
           刷新数据
         </el-button>
       </template>
@@ -75,12 +129,24 @@ function resetFilters() {
         <el-option label="4 星" :value="4" />
       </el-select>
       <el-button v-if="hasFilter" text @click="resetFilters">重置</el-button>
-      <span class="muted result-count">共 {{ filtered.length }} 位角色</span>
+      <span class="muted result-count">共 {{ total }} 位角色</span>
     </div>
 
-    <div v-if="filtered.length" class="character-grid">
+    <div v-if="isLoading && !items.length" class="panel panel--padded loading-panel">
+      正在加载角色数据…
+    </div>
+
+    <EmptyState
+      v-else-if="isError"
+      title="角色数据加载失败"
+      description="请检查 API 连接，或稍后重试。"
+    >
+      <el-button @click="query.refetch()">重试</el-button>
+    </EmptyState>
+
+    <div v-else-if="items.length" class="character-grid">
       <RouterLink
-        v-for="character in filtered"
+        v-for="character in items"
         :key="character.id"
         class="character-card panel"
         :to="`/characters/${character.id}`"
@@ -92,6 +158,7 @@ function resetFilters() {
             :alt="character.name"
             loading="lazy"
             referrerpolicy="no-referrer"
+            @error="hideOnError"
           />
           <span v-else>{{ character.name.slice(0, 1) }}</span>
         </div>
@@ -102,11 +169,8 @@ function resetFilters() {
           </div>
           <div class="character-card__tags">
             <ElementTag :element="character.element" />
-            <span class="tag">{{ WEAPON_META[character.weapon].label }}</span>
+            <span class="tag">{{ weaponLabel(character.weapon) }}</span>
           </div>
-          <p v-if="character.roles?.length" class="muted card-roles">
-            {{ character.roles.join(' · ') }}
-          </p>
         </div>
       </RouterLink>
     </div>
@@ -117,11 +181,21 @@ function resetFilters() {
       :description="
         hasFilter
           ? '试试放宽筛选条件，或重置筛选。'
-          : '运行 npm run import:data 生成真实角色快照。'
+          : '数据同步完成后会显示在这里。'
       "
     >
       <el-button v-if="hasFilter" @click="resetFilters">重置筛选</el-button>
     </EmptyState>
+
+    <div v-if="total > pageSize" class="pagination">
+      <el-pagination
+        v-model:current-page="page"
+        :page-size="pageSize"
+        :total="total"
+        layout="prev, pager, next"
+        background
+      />
+    </div>
   </div>
 </template>
 
@@ -141,6 +215,14 @@ function resetFilters() {
 .result-count {
   margin-left: auto;
   font-size: 13px;
+}
+
+.loading-panel {
+  min-height: 160px;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  font-size: 14px;
 }
 
 .character-grid {
@@ -212,8 +294,10 @@ function resetFilters() {
   gap: 6px;
 }
 
-.card-roles {
-  font-size: 12px;
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
 }
 
 @media (max-width: 600px) {

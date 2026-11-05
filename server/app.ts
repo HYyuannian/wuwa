@@ -10,14 +10,24 @@ import { weaponsRoute } from './routes/weapons'
 
 const app = new Hono().basePath('/api')
 
-const origins = process.env.CORS_ORIGIN?.split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean)
+const configuredOrigins = process.env.CORS_ORIGIN?.trim()
+const origins =
+  !configuredOrigins || configuredOrigins === '*'
+    ? '*'
+    : Array.from(
+        new Set([
+          ...configuredOrigins
+            .split(',')
+            .map((origin) => origin.trim())
+            .filter(Boolean),
+          'https://hyyuannian.github.io',
+        ]),
+      )
 
 app.use(
   '*',
   cors({
-    origin: origins?.length ? origins : '*',
+    origin: origins,
     allowMethods: ['GET', 'POST', 'OPTIONS'],
   }),
 )
