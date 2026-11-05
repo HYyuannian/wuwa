@@ -28,10 +28,11 @@ jobs:
             echo "health=$code $(head -c 120 /tmp/health 2>/dev/null || true)"
 
             if [ "$code" = "200" ]; then
-              for path in "/api/characters?page=1&pageSize=3" "/api/weapons?page=1&pageSize=3" "/api/echoes" "/api/stats"; do
-                body=$(curl -sS --max-time 20 "$base$path" || true)
-                summary=$(echo "$body" | jq -c '{total: .total, counts: .counts}' 2>/dev/null || echo "$body" | head -c 180)
-                echo "$path -> $summary"
+              for path in "/api/characters?page=1&pageSize=3" "/api/weapons?page=1&pageSize=3" "/api/echoes" "/api/stats" "/api/meta"; do
+                code=$(curl -sS -o /tmp/body -w "%{http_code}" --max-time 60 "$base$path" || true)
+                body=$(cat /tmp/body 2>/dev/null || true)
+                summary=$(echo "$body" | jq -c '{total: .total, counts: .counts, status: .status}' 2>/dev/null || echo "$body" | head -c 180)
+                echo "$path [$code] -> $summary"
               done
               break
             fi
