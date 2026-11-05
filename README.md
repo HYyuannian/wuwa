@@ -130,6 +130,7 @@ npm run import:data:refresh # 强制重新下载全部源数据
 npm run db:generate         # 生成 Drizzle 迁移
 npm run db:migrate          # 应用迁移到 Supabase
 npm run sync:db             # 把 Encore 数据同步到数据库
+npm run db:check            # 检查数据库连接和数据量
 ```
 
 ## 数据策略：构建时快照
