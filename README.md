@@ -6,7 +6,9 @@
 
 在线 Demo：https://hyyuannian.github.io/wuwa/
 
-> 当前状态：**可运行版本**，已接入社区数据快照：60 名角色、124 把武器、37 套声骸。角色含 Lv.1 基础面板、技能、头像与标签。
+> 当前状态：**静态站已上线**，数据快照：60 名角色、124 把武器、37 套声骸。角色含 Lv.1 基础面板、技能、头像与标签。
+>
+> 全栈改造进行中：Supabase + Vercel Functions 后端骨架已就位，前端仍使用静态快照，待数据库和部署配置完成后切换。
 
 ## 技术栈
 
@@ -19,6 +21,8 @@
 | 状态 | Pinia |
 | 路由 | Vue Router（Hash 模式，兼容 GitHub Pages） |
 | 数据 | Node 导入脚本 + 构建时本地 JSON 快照 |
+| 后端 API | Hono + Vercel Functions（开发中） |
+| 数据库 | Supabase Postgres + Drizzle（开发中） |
 
 ## 三天排期
 
@@ -70,11 +74,21 @@
 │     ├─ weapons.json
 │     ├─ echoes.json
 │     └─ teams.json
+├─ api/
+│  └─ [...route].ts          # Vercel Functions 入口
+├─ server/
+│  ├─ db/                    # Drizzle schema / 数据库连接
+│  ├─ lib/                   # Encore 抓取、同步、鉴权
+│  └─ routes/                # 只读 API 路由
+├─ drizzle/                  # 数据库迁移 SQL
+├─ docs/
+│  └─ supabase-vercel-plan.md
 ├─ scripts/
-│  └─ import-data.mjs        # 下载并转换社区数据，生成快照
+│  ├─ import-data.mjs        # 下载并转换社区数据，生成快照
+│  └─ sync-db.ts             # 把 Encore 数据同步到 Postgres
 ├─ .cache/                   # 下载缓存（已 gitignore）
 ├─ src/
-│  ├─ api/                   # 快照加载
+│  ├─ api/                   # 快照加载（后续切换为 API 客户端）
 │  ├─ components/            # 通用组件
 │  ├─ constants/             # 属性 / 武器元数据
 │  ├─ layouts/               # 页面布局
@@ -113,6 +127,9 @@ npm run typecheck           # 仅类型检查
 npm run preview             # 预览构建产物
 npm run import:data         # 生成 / 更新数据快照（优先用缓存）
 npm run import:data:refresh # 强制重新下载全部源数据
+npm run db:generate         # 生成 Drizzle 迁移
+npm run db:migrate          # 应用迁移到 Supabase
+npm run sync:db             # 把 Encore 数据同步到数据库
 ```
 
 ## 数据策略：构建时快照
@@ -139,6 +156,36 @@ npm run import:data:refresh # 强制重新下载全部源数据
 - 角色属性取详情中的 Lv.1 基础面板，技能与标签同步导入
 
 > 社区数据可能滞后于游戏版本，也可能包含未上线内容。本项目在导入阶段做了去重与过滤，但请以游戏内实际内容为准。
+
+## 全栈改造（进行中）
+
+方案文档：[`docs/supabase-vercel-plan.md`](docs/supabase-vercel-plan.md)
+
+已完成：
+
+- Supabase Postgres 表结构与 Drizzle 迁移
+- Encore 抓取模块（已实测 60 / 124 / 37）
+- 数据库同步脚本和受保护的同步接口
+- Hono 只读 API：角色、武器、声骸、统计、元信息
+
+待完成：
+
+- 创建 Supabase 项目并执行迁移
+- 配置 Vercel 环境变量与 Cron
+- 前端从静态快照切换到 API
+- 测试与 CI
+
+后端 API（部署后）：
+
+```text
+GET /api/characters
+GET /api/characters/:id
+GET /api/weapons
+GET /api/echoes
+GET /api/stats
+GET /api/meta
+GET /api/admin/sync   # 需要 CRON_SECRET
+```
 
 ## 部署
 

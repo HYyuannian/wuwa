@@ -5,25 +5,37 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "build": "vue-tsc -b && tsc -p tsconfig.server.json --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "vue-tsc -b",
+    "typecheck": "vue-tsc -b && tsc -p tsconfig.server.json --noEmit",
     "import:data": "node scripts/import-data.mjs",
-    "import:data:refresh": "node scripts/import-data.mjs --refresh"
+    "import:data:refresh": "node scripts/import-data.mjs --refresh",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "sync:db": "tsx scripts/sync-db.ts"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
+    "@hono/zod-validator": "^0.9.1",
+    "dotenv": "^18.0.9",
+    "drizzle-orm": "^0.45.4",
     "echarts": "^6.1.0",
     "element-plus": "^2.14.7",
+    "hono": "^4.13.16",
     "pinia": "^4.1.0",
+    "postgres": "^4.0.0",
     "vue": "^3.5.44",
     "vue-echarts": "^8.3.2",
-    "vue-router": "^5.4.0"
+    "vue-router": "^5.4.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
     "@vitejs/plugin-vue": "^6.0.10",
     "@vue/tsconfig": "^0.9.1",
+    "drizzle-kit": "^0.31.11",
+    "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "vite": "^8.3.5",
     "vue-tsc": "^3.3.13"
