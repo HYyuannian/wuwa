@@ -1,4 +1,4 @@
-﻿import { eq } from 'drizzle-orm'
+﻿import { eq, sql } from 'drizzle-orm'
 import { db } from '../db/client'
 import {
   characterRoles,
@@ -25,6 +25,10 @@ export async function replaceDatabase(
   data: EncoreData,
 ): Promise<SyncResult['counts']> {
   return db.transaction(async (tx) => {
+    await tx.execute(sql`set local lock_timeout = '10s'`)
+    await tx.execute(sql`set local statement_timeout = '120s'`)
+
+    console.info('[sync] clearing tables')
     await tx.delete(characterRoles)
     await tx.delete(characterSkills)
     await tx.delete(characterStats)
@@ -33,6 +37,7 @@ export async function replaceDatabase(
     await tx.delete(echoSets)
 
     if (data.characters.length) {
+      console.info('[sync] inserting characters')
       await tx.insert(characters).values(
         data.characters.map((character) => ({
           id: character.id,
@@ -89,6 +94,7 @@ export async function replaceDatabase(
     }
 
     if (data.weapons.length) {
+      console.info('[sync] inserting weapons')
       await tx.insert(weapons).values(
         data.weapons.map((weapon) => ({
           id: weapon.id,
@@ -107,6 +113,7 @@ export async function replaceDatabase(
     }
 
     if (data.echoes.length) {
+      console.info('[sync] inserting echoes')
       await tx.insert(echoSets).values(
         data.echoes.map((echo) => ({
           id: echo.id,
@@ -135,6 +142,9 @@ async function syncWith(
     .returning({ id: syncRuns.id })
 
   try {
+    console.info('[sync] testing database connection')
+    await db.execute(sql`select 1`)
+    console.info('[sync] database connection ok')
     console.info('[sync] loading data')
     const data = await loadData()
     console.info(

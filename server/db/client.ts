@@ -18,6 +18,8 @@ const client =
     prepare: false,
     max: 3,
     ssl: 'require',
+    connect_timeout: 20,
+    idle_timeout: 20,
   })
 
 globalForDb.__postgresClient = client
