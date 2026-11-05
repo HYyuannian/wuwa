@@ -12,10 +12,12 @@
 - [x] 生成迁移：`drizzle/0000_rainy_zemo.sql`
 - [x] Encore 抓取与数据库同步模块（实测 60 / 124 / 37）
 - [x] 只读 API（Hono），`/api/health` 与 404 路由本地验证通过
-- [ ] Supabase 建库与迁移
+- [x] Supabase 建库与迁移
+- [x] 数据导入：60 角色 / 124 武器 / 37 声骸
+- [x] API smoke 测试通过（health / characters / detail / weapons / echoes / stats / meta）
 - [ ] Vercel 部署
 - [ ] 前端切换为 API 查询
-- [ ] 测试、README、CI
+- [ ] README 截图 / CI 完善
 
 ## 架构
 

@@ -164,17 +164,17 @@ npm run db:check            # 检查数据库连接和数据量
 
 已完成：
 
-- Supabase Postgres 表结构与 Drizzle 迁移
-- Encore 抓取模块（已实测 60 / 124 / 37）
-- 数据库同步脚本和受保护的同步接口
+- Supabase 项目、表结构、Drizzle 迁移
+- 数据导入：60 角色 / 124 武器 / 37 声骸
+- Encore 抓取模块、快照入库、受保护的同步接口
 - Hono 只读 API：角色、武器、声骸、统计、元信息
+- API smoke 测试通过（角色列表/详情、武器、声骸、统计、元信息）
 
 待完成：
 
-- 创建 Supabase 项目并执行迁移
-- 配置 Vercel 环境变量与 Cron
+- 配置 Vercel 环境变量并部署 API
 - 前端从静态快照切换到 API
-- 测试与 CI
+- 截图、CI 与最终验收
 
 后端 API（部署后）：
 
