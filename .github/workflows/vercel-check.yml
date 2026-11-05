@@ -1,0 +1,35 @@
+name: Vercel check
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Optional Vercel base URL
+        required: false
+        default: ''
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe candidates
+        run: |
+          candidates="${{ inputs.base_url }}"
+          if [ -z "$candidates" ]; then
+            candidates="https://wuwa.vercel.app https://wuwa-hyyuannian.vercel.app https://hyyuannian-wuwa.vercel.app https://wuwa-git-main-hyyuannian.vercel.app"
+          fi
+
+          for base in $candidates; do
+            echo "== $base =="
+            code=$(curl -sS -o /tmp/health -w "%{http_code}" --max-time 20 "$base/api/health" || true)
+            echo "health=$code $(head -c 120 /tmp/health 2>/dev/null || true)"
+
+            if [ "$code" = "200" ]; then
+              for path in "/api/characters?page=1&pageSize=3" "/api/weapons?page=1&pageSize=3" "/api/echoes" "/api/stats"; do
+                body=$(curl -sS --max-time 20 "$base$path" || true)
+                summary=$(echo "$body" | jq -c '{total: .total, counts: .counts}' 2>/dev/null || echo "$body" | head -c 180)
+                echo "$path -> $summary"
+              done
+              break
+            fi
+          done
