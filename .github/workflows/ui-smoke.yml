@@ -2,6 +2,11 @@ name: UI smoke test
 
 on:
   workflow_dispatch:
+    inputs:
+      base_url:
+        description: Base URL to test
+        required: false
+        default: https://wuwa-hyyuannian.vercel.app
 
 jobs:
   smoke:
@@ -17,4 +22,4 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: node scripts/ui-smoke.mjs
         env:
-          BASE_URL: https://wuwa-hyyuannian.vercel.app
+          BASE_URL: ${{ inputs.base_url }}

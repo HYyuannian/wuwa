@@ -36,9 +36,14 @@ export async function apiGet<T>(
     }
   }
 
+  const timeoutSignal = AbortSignal.timeout(15_000)
+  const requestSignal = signal
+    ? AbortSignal.any([signal, timeoutSignal])
+    : timeoutSignal
+
   const response = await fetch(url, {
     headers: { accept: 'application/json' },
-    signal,
+    signal: requestSignal,
   })
 
   if (!response.ok) {

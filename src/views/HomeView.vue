@@ -5,6 +5,7 @@ import EmptyState from '@/components/EmptyState.vue'
 import RarityChart from '@/components/RarityChart.vue'
 import StatCard from '@/components/StatCard.vue'
 import WeaponTypeChart from '@/components/WeaponTypeChart.vue'
+import { useSnapshotData } from '@/api/snapshot'
 import { useStatsQuery } from '@/queries/useStats'
 
 const query = useStatsQuery()
@@ -26,6 +27,17 @@ const isLoading = query.isLoading
 const isError = query.isError
 const hasCharacters = computed(() => counts.value.characters > 0)
 const hasWeapons = computed(() => counts.value.weapons > 0)
+const isSnapshot = computed(
+  () => useSnapshotData || meta.value?.status === 'snapshot',
+)
+const sourceLabel = computed(() =>
+  isSnapshot.value ? '本地快照（GitHub Pages 镜像）' : 'Supabase / encore.moe',
+)
+const sourceNote = computed(() =>
+  isSnapshot.value
+    ? 'GitHub Pages 镜像使用构建时快照；Vercel 主站使用 Supabase API。'
+    : '前端通过 /api 只读查询，角色、武器和声骸数据都存储在 Supabase。',
+)
 </script>
 
 <template>
@@ -35,8 +47,8 @@ const hasWeapons = computed(() => counts.value.weapons > 0)
         <span class="tag tag--brand">非官方粉丝项目</span>
         <h1>鸣潮数据看板</h1>
         <p class="hero__desc">
-          角色、武器、声骸与配队的一站式检索与可视化。数据来自 Supabase，
-          页面只读查询，不再打包游戏数据。
+          角色、武器、声骸与配队的一站式检索与可视化。Vercel 主站通过
+          Supabase API 只读查询；GitHub Pages 镜像使用本地快照。
         </p>
         <div class="hero__actions">
           <RouterLink class="btn btn--primary" to="/characters">
@@ -87,7 +99,7 @@ const hasWeapons = computed(() => counts.value.weapons > 0)
         <dl class="meta-list">
           <div>
             <dt>数据来源</dt>
-            <dd>Supabase / encore.moe</dd>
+            <dd>{{ sourceLabel }}</dd>
           </div>
           <div>
             <dt>最近同步</dt>
@@ -98,9 +110,7 @@ const hasWeapons = computed(() => counts.value.weapons > 0)
             <dd>{{ meta?.status ?? '未知' }}</dd>
           </div>
         </dl>
-        <p class="muted side__note">
-          前端通过 <code>/api</code> 只读查询，角色、武器和声骸数据都存储在 Supabase。
-        </p>
+        <p class="muted side__note">{{ sourceNote }}</p>
         <RouterLink class="text-link" to="/teams">了解配队模块 →</RouterLink>
       </aside>
     </section>
