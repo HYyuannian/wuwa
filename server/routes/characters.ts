@@ -11,7 +11,7 @@ import {
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { z } from 'zod'
-import { db } from '../db/client'
+import { getDb } from '../db/client'
 import {
   characterRoles,
   characterSkills,
@@ -52,6 +52,7 @@ charactersRoute.get(
   '/',
   zValidator('query', querySchema),
   async (c) => {
+    const db = getDb()
     const { element, weapon, rarity, q, page, pageSize } =
       c.req.valid('query')
 
@@ -96,6 +97,7 @@ charactersRoute.get(
 )
 
 charactersRoute.get('/:id', async (c) => {
+  const db = getDb()
   const id = c.req.param('id')
 
   const [character] = await db

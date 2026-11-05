@@ -1,12 +1,13 @@
 import { desc, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
-import { db } from '../db/client'
+import { getDb } from '../db/client'
 import { characters, echoSets, syncRuns, weapons } from '../db/schema'
 import { setCache } from '../lib/cache'
 
 export const statsRoute = new Hono()
 
 statsRoute.get('/', async (c) => {
+  const db = getDb()
   const [
     characterCountRows,
     weaponCountRows,

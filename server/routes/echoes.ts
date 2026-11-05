@@ -3,7 +3,7 @@ import { asc, eq, type SQL } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { z } from 'zod'
-import { db } from '../db/client'
+import { getDb } from '../db/client'
 import { echoSets } from '../db/schema'
 import { setCache } from '../lib/cache'
 
@@ -26,6 +26,7 @@ echoesRoute.get(
   '/',
   zValidator('query', querySchema),
   async (c) => {
+    const db = getDb()
     const { element } = c.req.valid('query')
     const filters: SQL[] = []
 
@@ -44,6 +45,7 @@ echoesRoute.get(
 )
 
 echoesRoute.get('/:id', async (c) => {
+  const db = getDb()
   const id = c.req.param('id')
 
   const [echo] = await db

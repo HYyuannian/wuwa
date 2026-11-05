@@ -1,12 +1,13 @@
 import { desc } from 'drizzle-orm'
 import { Hono } from 'hono'
-import { db } from '../db/client'
+import { getDb } from '../db/client'
 import { syncRuns } from '../db/schema'
 import { setCache } from '../lib/cache'
 
 export const metaRoute = new Hono()
 
 metaRoute.get('/', async (c) => {
+  const db = getDb()
   const [latest] = await db
     .select({
       status: syncRuns.status,

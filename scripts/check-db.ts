@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { desc, sql } from 'drizzle-orm'
-import { db } from '../server/db/client'
+import { getDb } from '../server/db/client'
 import {
   characters,
   echoSets,
@@ -9,6 +9,7 @@ import {
 } from '../server/db/schema'
 
 try {
+  const db = getDb()
   const [characterCount] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(characters)

@@ -11,7 +11,7 @@ import {
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { z } from 'zod'
-import { db } from '../db/client'
+import { getDb } from '../db/client'
 import { weapons } from '../db/schema'
 import { setCache } from '../lib/cache'
 
@@ -37,6 +37,7 @@ weaponsRoute.get(
   '/',
   zValidator('query', querySchema),
   async (c) => {
+    const db = getDb()
     const { type, rarity, q, page, pageSize } = c.req.valid('query')
 
     const filters: SQL[] = []
@@ -80,6 +81,7 @@ weaponsRoute.get(
 )
 
 weaponsRoute.get('/:id', async (c) => {
+  const db = getDb()
   const id = c.req.param('id')
 
   const [weapon] = await db

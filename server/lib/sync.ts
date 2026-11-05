@@ -1,5 +1,5 @@
 ﻿import { eq, sql } from 'drizzle-orm'
-import { db } from '../db/client'
+import { getDb } from '../db/client'
 import {
   characterRoles,
   characterSkills,
@@ -24,6 +24,7 @@ export interface SyncResult {
 export async function replaceDatabase(
   data: EncoreData,
 ): Promise<SyncResult['counts']> {
+  const db = getDb()
   return db.transaction(async (tx) => {
     await tx.execute(sql`set local lock_timeout = '10s'`)
     await tx.execute(sql`set local statement_timeout = '120s'`)
@@ -136,6 +137,7 @@ async function syncWith(
   trigger: string,
   loadData: DataLoader,
 ): Promise<SyncResult> {
+  const db = getDb()
   const [run] = await db
     .insert(syncRuns)
     .values({ trigger, status: 'running' })
@@ -192,4 +194,5 @@ export async function runSyncFromSnapshot(
 ): Promise<SyncResult> {
   return syncWith(trigger, () => loadSnapshotData())
 }
+
 
