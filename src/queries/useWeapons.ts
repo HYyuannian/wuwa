@@ -1,4 +1,4 @@
-﻿import { useQuery } from '@tanstack/vue-query'
+import { useQuery } from '@tanstack/vue-query'
 import { computed, type Ref } from 'vue'
 import { apiGet } from '@/api/http'
 import { toWeapon } from '@/api/mappers'
@@ -6,6 +6,10 @@ import {
   fetchSnapshotWeapons,
   useSnapshotData,
 } from '@/api/snapshot'
+import {
+  fetchSupabaseWeapons,
+  hasSupabaseRest,
+} from '@/api/supabase'
 import type { PageResponse, WeaponDto } from '@/api/types'
 import type { WeaponType } from '@/types'
 
@@ -27,6 +31,12 @@ export function useWeaponsQuery(filters: Ref<WeaponFilters>) {
         rarity: filters.value.rarity || undefined,
         page: filters.value.page,
         pageSize: filters.value.pageSize,
+      }
+
+      if (hasSupabaseRest) {
+        return fetchSupabaseWeapons(snapshotFilters, signal).catch(() =>
+          fetchSnapshotWeapons(snapshotFilters),
+        )
       }
 
       if (useSnapshotData) {

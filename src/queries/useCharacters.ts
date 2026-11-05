@@ -1,4 +1,4 @@
-﻿import { useQuery } from '@tanstack/vue-query'
+import { useQuery } from '@tanstack/vue-query'
 import { computed, type Ref } from 'vue'
 import { apiGet } from '@/api/http'
 import { toCharacter, toCharacterDetail } from '@/api/mappers'
@@ -7,6 +7,11 @@ import {
   fetchSnapshotCharacters,
   useSnapshotData,
 } from '@/api/snapshot'
+import {
+  fetchSupabaseCharacter,
+  fetchSupabaseCharacters,
+  hasSupabaseRest,
+} from '@/api/supabase'
 import type {
   CharacterDetailDto,
   CharacterSummaryDto,
@@ -36,6 +41,12 @@ export function useCharactersQuery(filters: Ref<CharacterFilters>) {
         pageSize: filters.value.pageSize,
       }
 
+      if (hasSupabaseRest) {
+        return fetchSupabaseCharacters(snapshotFilters, signal).catch(() =>
+          fetchSnapshotCharacters(snapshotFilters),
+        )
+      }
+
       if (useSnapshotData) {
         return fetchSnapshotCharacters(snapshotFilters)
       }
@@ -58,6 +69,12 @@ export function useCharacterQuery(id: Ref<string>) {
   return useQuery({
     queryKey: computed(() => ['character', id.value]),
     queryFn: ({ signal }) => {
+      if (hasSupabaseRest) {
+        return fetchSupabaseCharacter(id.value, signal).catch(() =>
+          fetchSnapshotCharacter(id.value),
+        )
+      }
+
       if (useSnapshotData) {
         return fetchSnapshotCharacter(id.value)
       }

@@ -5,7 +5,7 @@ import EmptyState from '@/components/EmptyState.vue'
 import RarityChart from '@/components/RarityChart.vue'
 import StatCard from '@/components/StatCard.vue'
 import WeaponTypeChart from '@/components/WeaponTypeChart.vue'
-import { useSnapshotData } from '@/api/snapshot'
+import { hasSupabaseRest } from '@/api/supabase'
 import { useStatsQuery } from '@/queries/useStats'
 
 const query = useStatsQuery()
@@ -28,16 +28,20 @@ const isError = query.isError
 const hasCharacters = computed(() => counts.value.characters > 0)
 const hasWeapons = computed(() => counts.value.weapons > 0)
 const isSnapshot = computed(
-  () => useSnapshotData || meta.value?.status === 'snapshot',
+  () => meta.value?.status === 'snapshot',
 )
 const sourceLabel = computed(() =>
   isSnapshot.value ? '本地快照（GitHub Pages 镜像）' : 'Supabase / encore.moe',
 )
-const sourceNote = computed(() =>
-  isSnapshot.value
-    ? 'GitHub Pages 镜像使用构建时快照；Vercel 主站使用 Supabase API。'
-    : '前端通过 /api 只读查询，角色、武器和声骸数据都存储在 Supabase。',
-)
+const sourceNote = computed(() => {
+  if (isSnapshot.value) {
+    return '当前使用构建时快照；配置 Supabase anon key 后会直连数据库。'
+  }
+
+  return hasSupabaseRest
+    ? '前端通过 Supabase REST（只读 RLS）直连数据库。'
+    : '前端通过 /api 只读查询，角色、武器和声骸数据都存储在 Supabase。'
+})
 </script>
 
 <template>

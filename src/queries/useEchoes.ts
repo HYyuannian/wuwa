@@ -5,12 +5,22 @@ import {
   fetchSnapshotEchoes,
   useSnapshotData,
 } from '@/api/snapshot'
+import {
+  fetchSupabaseEchoes,
+  hasSupabaseRest,
+} from '@/api/supabase'
 import type { EchoSetDto } from '@/api/types'
 
 export function useEchoesQuery() {
   return useQuery({
     queryKey: ['echoes'],
     queryFn: ({ signal }) => {
+      if (hasSupabaseRest) {
+        return fetchSupabaseEchoes(signal).catch(() =>
+          fetchSnapshotEchoes(),
+        )
+      }
+
       if (useSnapshotData) {
         return fetchSnapshotEchoes()
       }
