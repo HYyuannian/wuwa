@@ -76,7 +76,7 @@
 │     └─ teams.json
 ├─ api/
 │  └─ [...route].ts          # Vercel Functions 入口
-├─ api/_server/
+├─ api/lib/
 │  ├─ db/                    # Drizzle schema / 数据库连接
 │  ├─ lib/                   # Encore 抓取、同步、鉴权
 │  └─ routes/                # 只读 API 路由

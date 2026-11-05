@@ -2,7 +2,7 @@ export default async function handler(_req: unknown, res?: any) {
   let payload: string
 
   try {
-    const { app } = await import('./_server/app')
+    const { app } = await import('./lib/app')
     const response = await app.fetch(
       new Request('https://localhost/api/health'),
     )
