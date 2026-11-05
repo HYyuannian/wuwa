@@ -9,8 +9,21 @@ const page = await browser.newPage({
 })
 
 const pageErrors = []
+let supabaseRequests = 0
+let supabaseOk = 0
+
 page.on('pageerror', (error) => pageErrors.push(error.message))
 page.on('response', (response) => {
+  if (response.url().includes('/rest/v1/')) {
+    supabaseRequests += 1
+    if (response.ok()) supabaseOk += 1
+    console.log(
+      '[ui] supabase',
+      response.status(),
+      response.url().split('?')[0],
+    )
+  }
+
   if (response.url().includes('/api/')) {
     console.log('[ui] api', response.status(), response.url())
   }
@@ -26,9 +39,16 @@ try {
   const cardCount = await page.locator('.character-card').count()
   const resultText = await page.locator('.result-count').innerText()
   console.log(`[ui] characters cards=${cardCount} result=${resultText}`)
+  console.log(
+    `[ui] supabase requests=${supabaseRequests} ok=${supabaseOk}`,
+  )
 
   if (cardCount < 20 || !resultText.includes('60')) {
     throw new Error('角色列表渲染数量不符合预期')
+  }
+
+  if (supabaseOk === 0) {
+    throw new Error('未检测到成功的 Supabase REST 请求，可能仍在用快照')
   }
 
   await page.goto(`${baseUrl}/#/characters/1304`, {
@@ -67,11 +87,16 @@ try {
   const statValues = await page
     .locator('.stat-card__value')
     .allInnerTexts()
+  const sourceNote = await page.locator('.side__note').innerText()
   console.log(`[ui] home charts=${chartCount} stats=${statValues.join(',')}`)
+  console.log(`[ui] source note=${sourceNote}`)
 
   if (chartCount < 3) throw new Error('首页图表未渲染')
   if (!statValues.includes('60') || !statValues.includes('124')) {
     throw new Error('首页统计数字不符合预期')
+  }
+  if (sourceNote.includes('快照')) {
+    throw new Error('仍在使用本地快照，Supabase 未生效')
   }
 
   if (pageErrors.length) {
