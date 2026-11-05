@@ -5,39 +5,67 @@ export const config = {
   maxDuration: 60,
 }
 
-export default async function handler(
+function nodeHeaders(req: IncomingMessage): Headers {
+  const headers = new Headers()
+
+  for (const [key, value] of Object.entries(req.headers)) {
+    if (Array.isArray(value)) {
+      for (const item of value) headers.append(key, item)
+    } else if (value !== undefined) {
+      headers.set(key, value)
+    }
+  }
+
+  return headers
+}
+
+async function handleNodeRequest(
   req: IncomingMessage,
   res: ServerResponse,
 ) {
-  try {
-    const host = req.headers.host ?? 'localhost'
-    const url = new URL(req.url ?? '/', `https://${host}`)
+  const host = req.headers.host ?? 'localhost'
+  const url = new URL(req.url ?? '/', `https://${host}`)
+  const response = await app.fetch(
+    new Request(url, {
+      method: req.method,
+      headers: nodeHeaders(req),
+    }),
+  )
 
-    const headers = new Headers()
-    for (const [key, value] of Object.entries(req.headers)) {
-      if (Array.isArray(value)) {
-        for (const item of value) headers.append(key, item)
-      } else if (value !== undefined) {
-        headers.set(key, value)
-      }
+  res.statusCode = response.status
+  response.headers.forEach((value, key) => {
+    res.setHeader(key, value)
+  })
+  res.end(Buffer.from(await response.arrayBuffer()))
+}
+
+export default async function handler(
+  req: IncomingMessage | Request,
+  res?: ServerResponse,
+) {
+  const message = (error: unknown) =>
+    error instanceof Error ? error.message : String(error)
+
+  try {
+    if (res) {
+      await handleNodeRequest(req as IncomingMessage, res)
+      return
     }
 
-    const request = new Request(url, {
-      method: req.method,
-      headers,
-    })
-
-    const response = await app.fetch(request)
-
-    res.statusCode = response.status
-    response.headers.forEach((value, key) => {
-      res.setHeader(key, value)
-    })
-    res.end(Buffer.from(await response.arrayBuffer()))
+    return await app.fetch(req as Request)
   } catch (error) {
     console.error('[api] adapter error', error)
-    res.statusCode = 500
-    res.setHeader('content-type', 'application/json')
-    res.end(JSON.stringify({ error: 'Internal Server Error' }))
+
+    if (res) {
+      res.statusCode = 500
+      res.setHeader('content-type', 'application/json')
+      res.end(JSON.stringify({ error: message(error) }))
+      return
+    }
+
+    return new Response(JSON.stringify({ error: message(error) }), {
+      status: 500,
+      headers: { 'content-type': 'application/json' },
+    })
   }
 }
