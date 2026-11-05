@@ -10,6 +10,11 @@ const page = await browser.newPage({
 
 const pageErrors = []
 page.on('pageerror', (error) => pageErrors.push(error.message))
+page.on('response', (response) => {
+  if (response.url().includes('/api/')) {
+    console.log('[ui] api', response.status(), response.url())
+  }
+})
 
 try {
   await page.goto(`${baseUrl}/#/characters`, {
@@ -27,10 +32,22 @@ try {
   }
 
   await page.goto(`${baseUrl}/#/characters/1304`, {
-    waitUntil: 'networkidle',
+    waitUntil: 'domcontentloaded',
     timeout: 45_000,
   })
-  await page.waitForSelector('.skill-list__head', { timeout: 30_000 })
+  await page.waitForTimeout(5000)
+  console.log('[ui] detail url', page.url())
+  console.log(
+    '[ui] detail body',
+    (await page.locator('body').innerText()).slice(0, 1200),
+  )
+  console.log('[ui] detail errors', pageErrors)
+  try {
+    await page.waitForSelector('.skill-list__head', { timeout: 15_000 })
+  } catch (error) {
+    await page.screenshot({ path: 'detail-failure.png' })
+    throw error
+  }
 
   const name = await page.locator('h1').first().innerText()
   const skillCount = await page.locator('.skill-list__head').count()
