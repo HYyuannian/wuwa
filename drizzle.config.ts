@@ -10,6 +10,7 @@ export default defineConfig({
       process.env.DIRECT_URL ??
       process.env.DATABASE_URL ??
       'postgres://localhost:5432/postgres',
+    ssl: 'require',
   },
   strict: true,
   verbose: true,

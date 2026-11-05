@@ -17,6 +17,7 @@ const client =
   postgres(connectionString, {
     prepare: false,
     max: 3,
+    ssl: 'require',
   })
 
 globalForDb.__postgresClient = client
