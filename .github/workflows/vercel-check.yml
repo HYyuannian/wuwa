@@ -40,3 +40,10 @@ jobs:
               break
             fi
           done
+
+          detail_code=$(curl -sS -o /tmp/detail -w "%{http_code}" --max-time 20 "$base/api/characters/1304" || true)
+          echo "detail [$detail_code] $(head -c 300 /tmp/detail 2>/dev/null || true)"
+
+          list=$(curl -sS --max-time 20 "$base/api/characters?page=1&pageSize=100" || true)
+          echo "has-1304=$(echo "$list" | jq -r '[.items[].id] | index("1304") != null')"
+          echo "sample-ids=$(echo "$list" | jq -c '[.items[0:10][].id]')"
