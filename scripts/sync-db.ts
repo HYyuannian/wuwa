@@ -1,5 +1,8 @@
 import 'dotenv/config'
-import { runSync, runSyncFromSnapshot } from '../server/lib/sync'
+import {
+  runSync,
+  runSyncFromSnapshot,
+} from '../api/_server/lib/sync'
 
 const useSnapshot = process.argv.includes('--snapshot')
 

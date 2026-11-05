@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { app } from '../server/app'
+import { app } from './_server/app'
 
 export const config = {
   maxDuration: 60,

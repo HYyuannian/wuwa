@@ -1,12 +1,12 @@
 import 'dotenv/config'
 import { desc, sql } from 'drizzle-orm'
-import { getDb } from '../server/db/client'
+import { getDb } from '../api/_server/db/client'
 import {
   characters,
   echoSets,
   syncRuns,
   weapons,
-} from '../server/db/schema'
+} from '../api/_server/db/schema'
 
 try {
   const db = getDb()
