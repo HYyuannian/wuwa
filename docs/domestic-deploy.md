@@ -2,7 +2,10 @@
 
 > 目标：让完整 API 版本在中国大陆网络下可直接访问，不再依赖 `*.vercel.app`。
 >
-> 前置结论：GitHub Pages 镜像已经可用（静态快照）；本文档用于部署**完整 API**。
+> **最终方案：GitHub Pages + Supabase REST 直连（RLS 只读）**。Supabase 网关在国内可访问，
+> 前端不需要经过 Vercel；anon key 是公开 key，写权限由 RLS 拦截。
+>
+> 本文档的 CloudBase / Docker 方案作为备选保留：如果以后需要自建 Hono API，可以使用。
 
 ## 可选平台
 
@@ -66,12 +69,31 @@ curl http://127.0.0.1:3001/api/health
 
 GitHub Actions 负责的定时同步可以继续从 GitHub 侧写国内数据库，也可以改到国内主机。
 
-## 下一步
+## 当前推荐：Supabase REST 直连
 
-选定平台后，需要：
+GitHub Pages 构建时注入：
 
-- 平台账号（实名）
-- 镜像仓库（或平台自带的代码构建）
-- 国内 API 域名/默认域名
+```env
+VITE_SUPABASE_URL=https://<project-ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon public / publishable key>
+```
 
-把平台和可用的登录方式告诉我，我可以继续准备镜像构建、环境变量和部署命令。
+数据库执行 `npm run db:rls`，为业务表启用 RLS 并只授予 `select`。
+
+安全约束：
+
+- anon / publishable key 会出现在前端 bundle 中，这是设计允许的
+- 绝对不要把 service_role / secret key 放进前端
+- 所有写操作由 GitHub Actions 使用服务端连接串完成
+
+实测：Playwright 检测到 `/rest/v1/characters`、`/rest/v1/weapons`、`/rest/v1/echo_sets` 等请求返回 200，
+首页统计 60 / 124 / 37。
+
+## 备选：自建 Hono API
+
+如果需要把 API 部署到云托管 / VPS：
+
+- 使用 `Dockerfile` + `server/standalone.ts`
+- 端口 3000，环境变量 `DATABASE_URL`、`CRON_SECRET`、`CORS_ORIGIN`
+- 国内平台需实名；CloudBase 云托管支持上海地域
+- 数据库如果留在 Supabase，需要从国内主机实测连通性；否则迁移到国内 Postgres

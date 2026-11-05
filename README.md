@@ -4,11 +4,11 @@
 
 仓库：https://github.com/HYyuannian/wuwa
 
-在线 Demo（Vercel + Supabase）：https://wuwa-hyyuannian.vercel.app/
+在线 Demo（国内可访问）：https://hyyuannian.github.io/wuwa/
 
-GitHub Pages 镜像：https://hyyuannian.github.io/wuwa/
+Vercel 备用（海外/需代理）：https://wuwa-hyyuannian.vercel.app/
 
-> 当前状态：**全栈版本已上线**。前端通过 Vercel Functions 只读查询 Supabase，数据为 60 名角色、124 把武器、37 套声骸。
+> 当前状态：**全栈版本已上线**。GitHub Pages 通过 Supabase REST 直连数据库（只读 RLS），国内网络可直接访问；数据为 60 名角色、124 把武器、37 套声骸。
 >
 > 角色含 Lv.1 基础面板、技能、头像与标签；列表支持服务端筛选和分页。
 
@@ -22,9 +22,9 @@ GitHub Pages 镜像：https://hyyuannian.github.io/wuwa/
 | 图表 | ECharts + vue-echarts |
 | 状态 | Pinia（主题）+ TanStack Query（服务端数据） |
 | 路由 | Vue Router（Hash 模式，兼容 GitHub Pages） |
-| 数据 | Supabase Postgres + Encore 快照种子 |
-| 后端 API | Hono + Vercel Functions |
-| 数据库 | Supabase Postgres + Drizzle |
+| 数据 | Supabase Postgres + REST（RLS 只读）+ 快照兜底 |
+| 后端 API | Hono + Vercel Functions（可选） |
+| 数据库 | Supabase Postgres + Drizzle + RLS |
 | API 打包 | esbuild 单文件函数 |
 
 ## 三天排期
@@ -175,9 +175,11 @@ npm run db:check            # 检查数据库连接和数据量
 - 数据导入：60 角色 / 124 武器 / 37 声骸
 - Encore 抓取模块、快照入库、受保护的同步接口
 - Hono 只读 API：角色、武器、声骸、统计、元信息
-- Vercel 部署：前端 + API 同一项目
-- 前端 TanStack Query 化：服务端筛选、分页、加载/错误状态
-- API smoke 与 Playwright UI smoke 均通过
+- **GitHub Pages 直连 Supabase REST**：国内网络可用
+- 表级 GRANT + 行级 RLS：anon key 只读，前端不接触 service role
+- TanStack Query：服务端筛选、分页、加载/错误状态
+- Playwright UI smoke 通过（检测到 Supabase REST 请求）
+- Vercel / Docker API 作为可选的海外或自托管方案保留
 
 后续可选项：
 
@@ -201,23 +203,29 @@ GET /api/admin/sync          # 需要 CRON_SECRET
 
 ## 部署
 
-### Vercel（主站，前端 + API）
-
-1. 导入 GitHub 仓库，Framework Preset 选 Vite。
-2. 构建命令 `npm run build`，输出目录 `dist`。
-3. 配置环境变量：`DATABASE_URL`、`DIRECT_URL`、`CRON_SECRET`、`VITE_API_BASE=/api`、`CORS_ORIGIN=*`。
-4. 访问：https://wuwa-hyyuannian.vercel.app/
-
-### GitHub Pages（静态镜像）
+### GitHub Pages（国内主站）
 
 1. 仓库 Settings → Pages → Source 选择 **GitHub Actions**。
-2. 推送到 `main` 后，`.github/workflows/deploy.yml` 会自动构建部署。
-3. 前端在 `github.io` 下会自动请求 Vercel API；CORS 已验证。
+2. 配置 Actions Variables：
+   - `VITE_SUPABASE_URL=https://<project-ref>.supabase.co`
+   - `VITE_SUPABASE_ANON_KEY=<anon public / publishable key>`
+3. 推送到 `main` 后自动构建部署。
 4. 访问：https://hyyuannian.github.io/wuwa/
+
+说明：
+
+- 前端直接请求 Supabase REST，不经过 Vercel，国内网络可访问
+- anon key 是公开 key，安全依赖 RLS；**不要**把 service_role key 放进前端
+- 数据库 RLS 由 `npm run db:rls` 配置为只读
+- 接口失败时自动回退到 `public/data` 快照
+
+### Vercel / Docker（可选）
+
+Vercel 主站和 Docker 版 Hono API 保留作为海外访问或自托管方案，详见 `docs/domestic-deploy.md`。
 
 ### 定时同步
 
-`.github/workflows/sync-db.yml` 每天从 encore.moe 同步到 Supabase；`db-setup.yml` 用于首次建库和种子导入。
+`.github/workflows/sync-db.yml` 每天从 encore.moe 同步到 Supabase；`db-setup.yml` 用于首次建库和种子导入；`db-rls.yml` 配置只读权限。
 
 ## 验收清单
 
@@ -226,7 +234,7 @@ GET /api/admin/sync          # 需要 CRON_SECRET
 - [x] 属性 / 稀有度 / 武器类型图表正常渲染
 - [x] 深色 / 浅色模式切换正常
 - [ ] 移动端细节打磨
-- [x] 前端运行时通过 Supabase API 只读查询
+- [x] GitHub Pages 直连 Supabase REST（RLS 只读）
 - [x] README 含在线地址与数据来源说明
 - [ ] README 截图 / GIF
 - [x] 部署成功且有可访问链接

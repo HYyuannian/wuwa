@@ -19,22 +19,30 @@
 - [x] 前端切换为 API 查询（TanStack Query + 服务端筛选/分页）
 - [x] Playwright UI smoke 通过（列表 24 卡、详情 10 技能、首页 3 图表）
 - [x] GitHub Pages 跨域 API 验证通过
+- [x] 国内方案：GitHub Pages 直连 Supabase REST（RLS 只读）
+- [x] RLS select-only 策略 + anon key 验证
 - [ ] README 截图 / CI 完善
 
 ## 架构
 
 ```text
 encore.moe API
-      │ 手动 / Vercel Cron
+      │ GitHub Actions 定时同步
       ▼
-Supabase Postgres
+Supabase Postgres（RLS 只读）
       │
-      ▼
-Vercel Functions（Hono + Drizzle，只读 API）
-      │  /api/*
-      ▼
-Vue 前端（只查询，不存游戏数据）
+      ├── Supabase REST（PostgREST，anon key）
+      │        │
+      │        ▼
+      │   GitHub Pages（国内主站）
+      │
+      └── Vercel Functions（Hono + Drizzle，可选）
+               │  /api/*
+               ▼
+           Vercel 前端 / 其他调用方
 ```
+
+国内主站不经过 Vercel：GitHub Pages 直接请求 Supabase REST，RLS 保证只读。
 
 ## 目录结构
 
