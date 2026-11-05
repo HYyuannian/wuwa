@@ -24,6 +24,9 @@ jobs:
             ping_code=$(curl -sS -o /tmp/ping -w "%{http_code}" --max-time 20 "$base/api/ping" || true)
             echo "ping=$ping_code $(head -c 120 /tmp/ping 2>/dev/null || true)"
 
+            cors=$(curl -sS -D - -o /dev/null --max-time 20 -H "Origin: https://hyyuannian.github.io" "$base/api/health" | grep -i '^access-control-allow-origin' || true)
+            echo "cors=$cors"
+
             code=$(curl -sS -o /tmp/health -w "%{http_code}" --max-time 20 "$base/api/health" || true)
             echo "health=$code $(head -c 120 /tmp/health 2>/dev/null || true)"
 
