@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "vue-tsc -b && tsc -p tsconfig.server.json --noEmit && vite build && npm run build:api",
     "build:api": "node scripts/build-api.mjs",
+    "build:server": "node scripts/build-server.mjs",
+    "start:server": "node dist-server/server.mjs",
     "preview": "vite preview",
     "typecheck": "vue-tsc -b && tsc -p tsconfig.server.json --noEmit",
     "import:data": "node scripts/import-data.mjs",
@@ -20,6 +22,7 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
+    "@hono/node-server": "^2.1.6",
     "@hono/zod-validator": "^0.9.1",
     "@tanstack/vue-query": "^5.106.1",
     "dotenv": "^18.0.9",
