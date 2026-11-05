@@ -110,33 +110,33 @@ charactersRoute.get('/:id', async (c) => {
     throw new HTTPException(404, { message: 'Character not found' })
   }
 
-  const [stats, skills, roles] = await Promise.all([
-    db
-      .select()
-      .from(characterStats)
-      .where(eq(characterStats.characterId, id))
-      .limit(1),
-    db
-      .select({
-        name: characterSkills.name,
-        type: characterSkills.type,
-        description: characterSkills.description,
-        sortOrder: characterSkills.sortOrder,
-      })
-      .from(characterSkills)
-      .where(eq(characterSkills.characterId, id))
-      .orderBy(asc(characterSkills.sortOrder)),
-    db
-      .select({ role: characterRoles.role })
-      .from(characterRoles)
-      .where(eq(characterRoles.characterId, id)),
-  ])
+  const statsRows = await db
+    .select()
+    .from(characterStats)
+    .where(eq(characterStats.characterId, id))
+    .limit(1)
+
+  const skills = await db
+    .select({
+      name: characterSkills.name,
+      type: characterSkills.type,
+      description: characterSkills.description,
+      sortOrder: characterSkills.sortOrder,
+    })
+    .from(characterSkills)
+    .where(eq(characterSkills.characterId, id))
+    .orderBy(asc(characterSkills.sortOrder))
+
+  const roles = await db
+    .select({ role: characterRoles.role })
+    .from(characterRoles)
+    .where(eq(characterRoles.characterId, id))
 
   setCache(c)
 
   return c.json({
     ...character,
-    stats: stats[0] ?? null,
+    stats: statsRows[0] ?? null,
     skills,
     roles: roles.map((item) => item.role),
   })
