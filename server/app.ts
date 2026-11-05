@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { HTTPException } from 'hono/http-exception'
 import { adminRoute } from './routes/admin'
+import { characterRoute } from './routes/character'
 import { charactersRoute } from './routes/characters'
 import { echoesRoute } from './routes/echoes'
 import { metaRoute } from './routes/meta'
@@ -34,6 +35,7 @@ app.use(
 
 app.get('/health', (c) => c.json({ ok: true }))
 
+app.route('/character', characterRoute)
 app.route('/characters', charactersRoute)
 app.route('/weapons', weaponsRoute)
 app.route('/echoes', echoesRoute)

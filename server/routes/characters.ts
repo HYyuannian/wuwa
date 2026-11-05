@@ -8,7 +8,7 @@ import {
   sql,
   type SQL,
 } from 'drizzle-orm'
-import { Hono } from 'hono'
+import { Hono, type Context } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { z } from 'zod'
 import { getDb } from '../db/client'
@@ -96,9 +96,8 @@ charactersRoute.get(
   },
 )
 
-charactersRoute.get('/:id', async (c) => {
+export async function getCharacterDetail(c: Context, id: string) {
   const db = getDb()
-  const id = c.req.param('id')
 
   const [character] = await db
     .select()
@@ -140,4 +139,8 @@ charactersRoute.get('/:id', async (c) => {
     skills,
     roles: roles.map((item) => item.role),
   })
-})
+}
+
+charactersRoute.get('/:id', (c) =>
+  getCharacterDetail(c, c.req.param('id')),
+)

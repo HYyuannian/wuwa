@@ -45,8 +45,8 @@ export function useCharacterQuery(id: Ref<string>) {
     queryKey: computed(() => ['character', id.value]),
     queryFn: ({ signal }) =>
       apiGet<CharacterDetailDto>(
-        `/characters/${encodeURIComponent(id.value)}`,
-        undefined,
+        '/character',
+        { id: id.value },
         signal,
       ).then(toCharacterDetail),
     enabled: computed(() => Boolean(id.value)),

@@ -33732,9 +33732,8 @@ charactersRoute.get(
     });
   }
 );
-charactersRoute.get("/:id", async (c2) => {
+async function getCharacterDetail(c2, id) {
   const db = getDb();
-  const id = c2.req.param("id");
   const [character] = await db.select().from(characters).where(eq(characters.id, id)).limit(1);
   if (!character) {
     throw new HTTPException(404, { message: "Character not found" });
@@ -33754,6 +33753,20 @@ charactersRoute.get("/:id", async (c2) => {
     skills,
     roles: roles.map((item) => item.role)
   });
+}
+charactersRoute.get(
+  "/:id",
+  (c2) => getCharacterDetail(c2, c2.req.param("id"))
+);
+
+// server/routes/character.ts
+var characterRoute = new Hono3();
+characterRoute.get("/", async (c2) => {
+  const id = c2.req.query("id");
+  if (!id) {
+    throw new HTTPException(400, { message: "id is required" });
+  }
+  return getCharacterDetail(c2, id);
 });
 
 // server/routes/echoes.ts
@@ -33929,6 +33942,7 @@ app.use(
   })
 );
 app.get("/health", (c2) => c2.json({ ok: true }));
+app.route("/character", characterRoute);
 app.route("/characters", charactersRoute);
 app.route("/weapons", weaponsRoute);
 app.route("/echoes", echoesRoute);
