@@ -27,6 +27,9 @@ jobs:
             code=$(curl -sS -o /tmp/health -w "%{http_code}" --max-time 20 "$base/api/health" || true)
             echo "health=$code $(head -c 120 /tmp/health 2>/dev/null || true)"
 
+            app_code=$(curl -sS -o /tmp/apptest -w "%{http_code}" --max-time 20 "$base/api/app-test" || true)
+            echo "app-test=$app_code $(head -c 500 /tmp/apptest 2>/dev/null || true)"
+
             if [ "$code" = "200" ]; then
               for path in "/api/characters?page=1&pageSize=3" "/api/weapons?page=1&pageSize=3" "/api/echoes" "/api/stats"; do
                 body=$(curl -sS --max-time 20 "$base$path" || true)
