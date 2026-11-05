@@ -4,11 +4,13 @@
 
 仓库：https://github.com/HYyuannian/wuwa
 
-在线 Demo：https://hyyuannian.github.io/wuwa/
+在线 Demo（Vercel + Supabase）：https://wuwa-hyyuannian.vercel.app/
 
-> 当前状态：**静态站已上线**，数据快照：60 名角色、124 把武器、37 套声骸。角色含 Lv.1 基础面板、技能、头像与标签。
+GitHub Pages 镜像：https://hyyuannian.github.io/wuwa/
+
+> 当前状态：**全栈版本已上线**。前端通过 Vercel Functions 只读查询 Supabase，数据为 60 名角色、124 把武器、37 套声骸。
 >
-> 全栈改造进行中：Supabase + Vercel Functions 后端骨架已就位，前端仍使用静态快照，待数据库和部署配置完成后切换。
+> 角色含 Lv.1 基础面板、技能、头像与标签；列表支持服务端筛选和分页。
 
 ## 技术栈
 
@@ -18,11 +20,12 @@
 | 构建 | Vite |
 | UI | Element Plus |
 | 图表 | ECharts + vue-echarts |
-| 状态 | Pinia |
+| 状态 | Pinia（主题）+ TanStack Query（服务端数据） |
 | 路由 | Vue Router（Hash 模式，兼容 GitHub Pages） |
-| 数据 | Node 导入脚本 + 构建时本地 JSON 快照 |
-| 后端 API | Hono + Vercel Functions（开发中） |
-| 数据库 | Supabase Postgres + Drizzle（开发中） |
+| 数据 | Supabase Postgres + Encore 快照种子 |
+| 后端 API | Hono + Vercel Functions |
+| 数据库 | Supabase Postgres + Drizzle |
+| API 打包 | esbuild 单文件函数 |
 
 ## 三天排期
 
@@ -40,8 +43,8 @@
 - [x] 角色列表、搜索、属性 / 武器 / 稀有度筛选
 - [x] 角色详情页
 - [x] Lv.1 基础属性接入
-- [ ] 角色头像接入（encore.moe 图片）
-- [ ] 技能字段适配
+- [x] 角色头像接入（encore.moe 图片）
+- [x] 技能字段适配
 - [ ] 突破材料与图片本地缓存
 
 ### Day 2：武器 / 声骸 / 配队 + 图表
@@ -57,10 +60,10 @@
 
 ### Day 3：打磨与交付
 
-- [ ] 响应式细节、骨架屏、错误态
-- [ ] 部署 Vercel 或 GitHub Pages
+- [x] 响应式细节、骨架屏、错误态
+- [x] 部署 Vercel + GitHub Pages
 - [ ] README 截图 / GIF、在线 Demo 链接
-- [ ] 补充 LICENSE（建议 MIT）
+- [x] 补充 LICENSE（MIT）
 - [ ] 打 `v0.1.0` tag
 
 ## 目录结构
@@ -68,37 +71,41 @@
 ```text
 .
 ├─ public/
-│  └─ data/                  # 构建时生成的数据快照（已提交）
-│     ├─ meta.json
-│     ├─ characters.json
-│     ├─ weapons.json
-│     ├─ echoes.json
-│     └─ teams.json
+│  └─ data/                  # Encore 快照（作为数据库种子）
 ├─ api/
-│  └─ [...route].ts          # Vercel Functions 入口
+│  ├─ [...route].js          # esbuild 打包后的 Vercel 函数（已提交）
+│  └─ ping.ts                # 最小健康探针
+├─ api-entry.ts              # Vercel 函数入口源码
 ├─ server/
 │  ├─ db/                    # Drizzle schema / 数据库连接
 │  ├─ lib/                   # Encore 抓取、同步、鉴权
 │  └─ routes/                # 只读 API 路由
 ├─ drizzle/                  # 数据库迁移 SQL
 ├─ docs/
-│  └─ supabase-vercel-plan.md
+│  ├─ supabase-vercel-plan.md
+│  └─ supabase-setup.md
 ├─ scripts/
 │  ├─ import-data.mjs        # 下载并转换社区数据，生成快照
-│  └─ sync-db.ts             # 把 Encore 数据同步到 Postgres
+│  ├─ sync-db.ts             # 把数据同步到 Postgres
+│  ├─ check-db.ts            # 检查数据库和数据量
+│  ├─ build-api.mjs          # esbuild 打包 API
+│  ├─ smoke-api.ts           # API 冒烟测试
+│  └─ ui-smoke.mjs           # Playwright UI 冒烟测试
 ├─ .cache/                   # 下载缓存（已 gitignore）
 ├─ src/
-│  ├─ api/                   # 快照加载（后续切换为 API 客户端）
+│  ├─ api/                   # API 客户端、DTO、映射
 │  ├─ components/            # 通用组件
+│  ├─ composables/           # 防抖等组合式函数
 │  ├─ constants/             # 属性 / 武器元数据
 │  ├─ layouts/               # 页面布局
 │  ├─ plugins/               # ECharts 按需注册
+│  ├─ queries/               # TanStack Query hooks
 │  ├─ router/                # 路由
-│  ├─ stores/                # Pinia（主题、数据集）
+│  ├─ stores/                # Pinia（仅主题）
 │  ├─ styles/                # 全局样式与主题变量
 │  ├─ types/                 # 数据模型
 │  └─ views/                 # 页面
-├─ .github/workflows/        # GitHub Pages 自动部署
+├─ .github/workflows/        # Pages / 数据库同步 / API / UI 测试
 └─ vite.config.ts            # 别名 / base
 ```
 
@@ -158,7 +165,7 @@ npm run db:check            # 检查数据库连接和数据量
 
 > 社区数据可能滞后于游戏版本，也可能包含未上线内容。本项目在导入阶段做了去重与过滤，但请以游戏内实际内容为准。
 
-## 全栈改造（进行中）
+## 全栈架构
 
 方案文档：[`docs/supabase-vercel-plan.md`](docs/supabase-vercel-plan.md)
 
@@ -168,41 +175,49 @@ npm run db:check            # 检查数据库连接和数据量
 - 数据导入：60 角色 / 124 武器 / 37 声骸
 - Encore 抓取模块、快照入库、受保护的同步接口
 - Hono 只读 API：角色、武器、声骸、统计、元信息
-- API smoke 测试通过（角色列表/详情、武器、声骸、统计、元信息）
+- Vercel 部署：前端 + API 同一项目
+- 前端 TanStack Query 化：服务端筛选、分页、加载/错误状态
+- API smoke 与 Playwright UI smoke 均通过
 
-待完成：
+后续可选项：
 
-- 配置 Vercel 环境变量并部署 API
-- 前端从静态快照切换到 API
-- 截图、CI 与最终验收
+- 配队模块
+- README 截图 / GIF
+- 更多 E2E 覆盖和性能优化
 
-后端 API（部署后）：
+API：
 
 ```text
 GET /api/characters
-GET /api/characters/:id
+GET /api/character?id=1304   # 单段路径，兼容 Vercel catch-all
 GET /api/weapons
 GET /api/echoes
 GET /api/stats
 GET /api/meta
-GET /api/admin/sync   # 需要 CRON_SECRET
+GET /api/admin/sync          # 需要 CRON_SECRET
 ```
+
+> Vercel 的 catch-all 函数只匹配单段路径，因此角色详情使用 `/api/character?id=`，前端会自动处理。
 
 ## 部署
 
-### Vercel（推荐）
+### Vercel（主站，前端 + API）
 
-1. 导入 GitHub 仓库。
+1. 导入 GitHub 仓库，Framework Preset 选 Vite。
 2. 构建命令 `npm run build`，输出目录 `dist`。
-3. 纯静态部署，无需配置接口代理。
+3. 配置环境变量：`DATABASE_URL`、`DIRECT_URL`、`CRON_SECRET`、`VITE_API_BASE=/api`、`CORS_ORIGIN=*`。
+4. 访问：https://wuwa-hyyuannian.vercel.app/
 
-### GitHub Pages（纯静态，兼容 Hash 路由）
+### GitHub Pages（静态镜像）
 
 1. 仓库 Settings → Pages → Source 选择 **GitHub Actions**。
 2. 推送到 `main` 后，`.github/workflows/deploy.yml` 会自动构建部署。
-3. 本项目使用相对路径 + Hash 路由，项目页无需额外设置 `VITE_BASE`。
-4. 启用后访问：https://hyyuannian.github.io/wuwa/
-5. 在仓库 Variables 里配置 `VITE_REPO_URL`，导航栏会显示 GitHub 入口。
+3. 前端在 `github.io` 下会自动请求 Vercel API；CORS 已验证。
+4. 访问：https://hyyuannian.github.io/wuwa/
+
+### 定时同步
+
+`.github/workflows/sync-db.yml` 每天从 encore.moe 同步到 Supabase；`db-setup.yml` 用于首次建库和种子导入。
 
 ## 验收清单
 
@@ -211,10 +226,11 @@ GET /api/admin/sync   # 需要 CRON_SECRET
 - [x] 属性 / 稀有度 / 武器类型图表正常渲染
 - [x] 深色 / 浅色模式切换正常
 - [ ] 移动端细节打磨
-- [x] 数据更新不依赖运行时接口
+- [x] 前端运行时通过 Supabase API 只读查询
 - [x] README 含在线地址与数据来源说明
 - [ ] README 截图 / GIF
 - [x] 部署成功且有可访问链接
+- [x] API 与 UI smoke 测试通过
 
 ## 数据来源与免责声明
 

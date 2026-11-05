@@ -15,8 +15,10 @@
 - [x] Supabase 建库与迁移
 - [x] 数据导入：60 角色 / 124 武器 / 37 声骸
 - [x] API smoke 测试通过（health / characters / detail / weapons / echoes / stats / meta）
-- [ ] Vercel 部署
-- [ ] 前端切换为 API 查询
+- [x] Vercel 部署：https://wuwa-hyyuannian.vercel.app/
+- [x] 前端切换为 API 查询（TanStack Query + 服务端筛选/分页）
+- [x] Playwright UI smoke 通过（列表 24 卡、详情 10 技能、首页 3 图表）
+- [x] GitHub Pages 跨域 API 验证通过
 - [ ] README 截图 / CI 完善
 
 ## 架构
@@ -38,7 +40,9 @@ Vue 前端（只查询，不存游戏数据）
 
 ```text
 api/
-└─ [...route].ts              # Vercel Functions 入口
+├─ [...route].js              # esbuild 打包后的 Vercel 函数（已提交）
+└─ ping.ts                    # 最小健康探针
+api-entry.ts                  # Vercel 函数入口源码
 server/
 ├─ app.ts                     # Hono 应用
 ├─ db/
@@ -88,9 +92,8 @@ vercel.json                    # Cron 配置
 | 方法 | 路径 | 说明 |
 |---|---|---|
 | GET | `/api/characters?element=&weapon=&rarity=&q=&page=&pageSize=` | 角色分页 / 筛选 |
-| GET | `/api/characters/:id` | 角色详情 + 属性 + 技能 + 标签 |
+| GET | `/api/character?id=1304` | 角色详情 + 属性 + 技能 + 标签 |
 | GET | `/api/weapons?type=&rarity=&q=&page=&pageSize=` | 武器分页 / 筛选 |
-| GET | `/api/weapons/:id` | 武器详情 |
 | GET | `/api/echoes?element=` | 声骸套装 |
 | GET | `/api/stats` | 首页统计和图表数据 |
 | GET | `/api/meta` | 数据版本、最后同步时间 |
@@ -112,6 +115,14 @@ vercel.json                    # Cron 配置
 - 读取接口设置 `Cache-Control`
 - 所有写操作只允许 `CRON_SECRET`
 - 数据库连接只存在于服务端，前端不接触 `DATABASE_URL`
+
+### Vercel 实现注意事项
+
+- Vercel 的 `[...route]` 函数只匹配单段路径，所以角色详情使用 `/api/character?id=`，而不是 `/api/characters/:id`。
+- 本地 `server/` 模块没有被 Vercel 自动打包，API 通过 `scripts/build-api.mjs`（esbuild）打包成单文件 `api/[...route].js`。
+- 修改后端代码后需要运行 `npm run build` 或 `npm run build:api` 重新生成函数包。
+- CORS 已验证支持 `https://hyyuannian.github.io`。
+- Vercel 项目需要关闭 Deployment Protection，生产站才公开访问。
 
 ## 数据同步
 
