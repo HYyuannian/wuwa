@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && tsc -p tsconfig.server.json --noEmit && vite build",
+    "build": "vue-tsc -b && tsc -p tsconfig.server.json --noEmit && vite build && npm run build:api",
+    "build:api": "node scripts/build-api.mjs",
     "preview": "vite preview",
     "typecheck": "vue-tsc -b && tsc -p tsconfig.server.json --noEmit",
     "import:data": "node scripts/import-data.mjs",
@@ -37,10 +38,10 @@
     "@vitejs/plugin-vue": "^6.0.10",
     "@vue/tsconfig": "^0.9.1",
     "drizzle-kit": "^0.31.11",
+    "esbuild": "^0.28.2",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "vite": "^8.3.5",
     "vue-tsc": "^3.3.13"
   }
 }
-

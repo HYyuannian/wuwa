@@ -14,11 +14,13 @@
     "types": ["node"],
     "noEmit": true,
     "paths": {
-      "@server/*": ["./api/lib/*"]
+      "@server/*": ["./server/*"]
     }
   },
   "include": [
     "api/**/*.ts",
+    "api-entry.ts",
+    "server/**/*.ts",
     "scripts/**/*.ts",
     "drizzle.config.ts"
   ]

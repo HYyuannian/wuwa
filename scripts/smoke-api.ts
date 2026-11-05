@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { app } from '../api/lib/app'
+import { app } from '../server/app'
 
 const checks: Array<{
   path: string

@@ -39,7 +39,7 @@ Vue 前端（只查询，不存游戏数据）
 ```text
 api/
 └─ [...route].ts              # Vercel Functions 入口
-api/lib/
+server/
 ├─ app.ts                     # Hono 应用
 ├─ db/
 │  ├─ schema.ts               # Drizzle 表结构
@@ -115,8 +115,8 @@ vercel.json                    # Cron 配置
 
 ## 数据同步
 
-1. `api/lib/lib/encore.ts` 从 encore.moe 拉取角色、武器、声骸列表和详情。
-2. `api/lib/lib/sync.ts` 在事务中先清空业务表，再批量写入最新数据。
+1. `server/lib/encore.ts` 从 encore.moe 拉取角色、武器、声骸列表和详情。
+2. `server/lib/sync.ts` 在事务中先清空业务表，再批量写入最新数据。
 3. 每次同步写入 `sync_runs`，失败时记录错误。
 4. 定时同步使用 GitHub Actions（`.github/workflows/sync-db.yml`），避免 Vercel Hobby 函数 60 秒限制；也可以本地运行 `npm run sync:db`。
 5. `/api/admin/sync` 保留为受保护的手动触发接口。
